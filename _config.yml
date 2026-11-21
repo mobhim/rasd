@@ -1,0 +1,25 @@
+title: رصد RASD
+description: اكتشاف حملات الاحتيال والهندسة الاجتماعية باللغة العربية — بالأدلة، لا بالتخمين
+lang: ar
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter_opts:
+    disable: true
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+relative_links:
+  enabled: true
+exclude: [src, tests, data, pyproject.toml, "*.zip", Gemfile, Gemfile.lock, vendor]
+defaults:
+  - scope: {path: ""}
+    values: {layout: default, dir: rtl}
+  - scope: {path: "README.md"}
+    values: {layout: home}
+  - scope: {path: "docs/research"}
+    values: {dir: ltr}

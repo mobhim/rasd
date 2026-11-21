@@ -1,0 +1,40 @@
+---
+layout: default
+---
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Arabic Threat Intelligence</p>
+    <h1>نكشف <em>الحملة</em>، لا الرسالة وحدها</h1>
+    <p class="lead">رصد يقرأ رسائل الاحتيال العربية بالفصحى واللهجات، يستخرج الروابط والأرقام والآيبانات والمحافظ، ويربط ما يعود منها لعملية واحدة — ويشرح الدليل وراء كل حكم وكل ربط.</p>
+    <div class="cta">
+      <a class="btn pri" href="#التشغيل">ابدأ التشغيل</a>
+      <a class="btn" href="{{ '/docs/04-evaluation.html' | relative_url }}">النتائج وحدودها</a>
+    </div>
+  </div>
+</section>
+
+<section class="wrap stats" aria-label="أرقام مقاسة">
+  <div class="stat"><b>12<span>/15</span></b><p>رسالة احتيال حقيقية التُقطت في نصف اختبار محجوب</p><small>بيانات حقيقية · عيّنة صغيرة</small></div>
+  <div class="stat"><b>0<span>/52</span></b><p>رسالة تسويق مشروعة أُشير إليها خطأً، مقابل 51 للمصنِّف النصي التقليدي</p><small>بيانات حقيقية</small></div>
+  <div class="stat"><b>0.96</b><p>F1 لربط الحملات، مقابل 0.53 لتجميع الرسائل بتشابه النص</p><small>بيانات اصطناعية بحقيقة معروفة</small></div>
+  <div class="stat"><b>0</b><p>رسالة سليمة دخلت حملة عبر أربع بذور تجريبية</p><small>بيانات اصطناعية</small></div>
+</section>
+
+<section class="wrap pillars">
+  <div><h3>معيار أدلة صريح</h3><p>مورد واحد يتحكم به المهاجم — نطاق، رقم تواصل، آيبان، محفظة — يكفي للربط. تشابه النص وحده لا يربط أبدًا.</p></div>
+  <div><h3>تفسير هو النموذج نفسه</h3><p>الدرجة مجموع أوزان أدلة مسمّاة، فمساهمة كل دليل دقيقة — مع ما يلزم إسقاطه ليتغيّر الحكم.</p></div>
+  <div><h3>عربي من الأساس</h3><p>فصحى وخمس لهجات، أرقام هندية، حروف فارسية شبيهة، أحرف مخفية، روابط مموّهة — وصيغ الهواتف والآيبان لكل بلد.</p></div>
+  <div><h3>خصوصية بالتصميم</h3><p>رقم الضحية لا يُخزَّن، والبطاقات والرموز تُطمس. لا جلب للروابط ولا تواصل مع بنية المهاجم.</p></div>
+</section>
+
+<section class="wrap shots">
+  <h2>لوحة التحقيق</h2>
+  <p class="note">لقطات من اللوحة على بيانات اصطناعية (نطاقات ‎.example/.test‎ لا تُحَلّ).</p>
+  <div class="gallery">
+    <figure><img src="{{ '/docs/img/campaign.png' | relative_url }}" alt="صفحة حملة: موارد مشتركة ورسم الأدلة" loading="lazy"><figcaption>حملة ورسم أدلتها</figcaption></figure>
+    <figure><img src="{{ '/docs/img/message.png' | relative_url }}" alt="تفسير حكم رسالة: مساهمة كل دليل" loading="lazy"><figcaption>لماذا هذا الحكم؟</figcaption></figure>
+    <figure><img src="{{ '/docs/img/overview.png' | relative_url }}" alt="النظرة العامة" loading="lazy"><figcaption>النظرة العامة</figcaption></figure>
+  </div>
+</section>
+
+<main class="wrap doc"><article class="prose readme">{{ content }}</article></main>

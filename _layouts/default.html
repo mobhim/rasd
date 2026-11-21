@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="{% if page.dir == 'ltr' %}en{% else %}ar{% endif %}" dir="{{ page.dir | default: 'rtl' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title and page.title != site.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+<meta name="description" content="{{ site.description }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+</head>
+<body class="{{ page.layout }}">
+{% assign here = page.url | remove: '.html' %}
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="{{ '/' | relative_url }}"><span class="mark" aria-hidden="true"></span>رصد <small>RASD</small></a>
+    <input type="checkbox" id="menu" class="menu-toggle" aria-label="القائمة">
+    <label for="menu" class="menu-btn" aria-hidden="true"><span></span></label>
+    <nav>
+      {% assign docs = "01-research-gap:البحث,02-problem-statement:المشكلة,03-architecture:المعمارية,04-evaluation:التقييم,05-security-privacy:الأمن والخصوصية,06-business-model:النموذج التجاري" | split: "," %}
+      {% for d in docs %}{% assign kv = d | split: ":" %}{% assign u = '/docs/' | append: kv[0] %}
+      <a href="{{ u | append: '.html' | relative_url }}" {% if here == u %}aria-current="page"{% endif %}>{{ kv[1] }}</a>{% endfor %}
+      <a class="gh" href="https://github.com/mobhim/rasd">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+{% if page.layout == "home" %}{{ content }}{% else %}<main class="wrap doc"><article class="prose">{{ content }}</article></main>{% endif %}
+<footer class="foot"><div class="wrap">
+  <span>رصد RASD · نموذج هندسي أولي v0.1</span>
+  <span>كل رقم في هذا الموقع مُقاس ويمكن إعادة إنتاجه بالأمر <code>rasd eval</code> — وحدوده مذكورة بجانبه.</span>
+</div></footer>
+</body>
+</html>

@@ -1,5 +1,3 @@
-<div dir="rtl">
-
 # رصد RASD — Arabic Threat Intelligence
 
 منظومة لاكتشاف **حملات** الهندسة الاجتماعية والاحتيال باللغة العربية (فصحى ولهجات): تستخرج المؤشرات الرقمية من الرسائل، وتربطها في رسم أدلة، وتشرح سبب كل حكم وكل ربط. ليست مصنِّف رسائل.
@@ -7,8 +5,6 @@
 > **حالة المشروع:** نموذج هندسي أولي (v0.1) يعمل ويُختبر. الأرقام أدناه مقاسة فعلًا، ومعظمها على بيانات اصطناعية — اقرأ قسم «ما الذي لم يثبت بعد».
 
 ## التشغيل
-
-<div dir="ltr">
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
@@ -20,8 +16,6 @@ rasd seed --db rasd.db                   # synthetic demo data (.example/.test d
 RASD_DB=rasd.db RASD_API_KEYS=my-key:default rasd serve   # dashboard: http://127.0.0.1:8000  API docs: /docs
 rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # reproduces docs/eval/results_seed7.json
 ```
-
-</div>
 
 البيانات الحقيقية لا تُوزَّع مع المستودع (GPL‑3.0 وتحوي بيانات شخصية)؛ نزّلها إلى `data/external/Arabic_Spam.csv` من `github.com/KhalidAlsantali/Arabic-SMS-Spam-Data`.
 
@@ -73,6 +67,12 @@ rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # reproduces docs/
 
 ## التوثيق
 
-`docs/01-research-gap.md` البحث والفجوة · `02-problem-statement.md` المشكلة والمقاييس · `03-architecture.md` المعمارية · `04-evaluation.md` التقييم · `05-security-privacy.md` الأمن والخصوصية · `06-business-model.md` النموذج التجاري · `research/raw_research_notes.md` المصادر كاملة.
-
-</div>
+| الوثيقة | المحتوى |
+|---|---|
+| [البحث والفجوة](docs/01-research-gap.md) | الأبحاث السابقة، المنافسون، الفجوة التقنية |
+| [المشكلة والمقاييس](docs/02-problem-statement.md) | صياغة قابلة للقياس وأهداف القبول |
+| [المعمارية](docs/03-architecture.md) | مسار البيانات، معيار الأدلة، الـAPI |
+| [التقييم](docs/04-evaluation.md) | المنهجية والنتائج وحدودها |
+| [الأمن والخصوصية](docs/05-security-privacy.md) | الخصوصية بالتصميم ونموذج التهديد |
+| [النموذج التجاري](docs/06-business-model.md) | العملاء، التسعير، التوسّع |
+| [ملاحظات البحث الخام](docs/research/raw_research_notes.md) | المصادر كاملة (بالإنجليزية) |
