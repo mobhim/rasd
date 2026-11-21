@@ -96,4 +96,17 @@ def explain_campaign(c: dict, lang: str = "ar") -> dict:
             lines.append(f"• Campaign {r['campaign_id']} uses similar text on different infrastructure — not merged: text similarity is not sufficient.")
         if c["associated_low_score_messages"]:
             lines.append(f"• {len(c['associated_low_score_messages'])} low-score messages share campaign resources — review advised.")
-    return {"campaign_id": c["id"], "confidence": c["confidence"], "confidence_reason": c["confidence_reason"], "narrative": lines}
+    return {"campaign_id": c["id"], "confidence": c["confidence"], "confidence_reason": _reason(c, lang), "narrative": lines}
+
+
+def _reason(c: dict, lang: str) -> str:
+    if lang != "ar":
+        return c["confidence_reason"]
+    n = c["shared_indicator_count"]
+    if "hard" not in c["link_kinds"]:
+        return "مربوطة بإشارات ضعيفة معزَّزة فقط، دون مورد مشترك يتحكم به المهاجم"
+    if c["confidence"] == "high":
+        return f"{n} موارد مشتركة يتحكم بها المهاجم، ولا تعتمد الحملة على مورد واحد"
+    if c["bridges"]:
+        return "مجموعات فرعية لا يجمعها إلا: " + "، ".join(c["bridges"][:3])
+    return "تعتمد على مورد مشترك واحد"

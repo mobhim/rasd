@@ -7,7 +7,8 @@ layout: default
     <h1>نكشف <em>الحملة</em>، لا الرسالة وحدها</h1>
     <p class="lead">رصد يقرأ رسائل الاحتيال العربية بالفصحى واللهجات، يستخرج الروابط والأرقام والآيبانات والمحافظ، ويربط ما يعود منها لعملية واحدة — ويشرح الدليل وراء كل حكم وكل ربط.</p>
     <div class="cta">
-      <a class="btn pri" href="#التشغيل">ابدأ التشغيل</a>
+      <a class="btn pri" href="{{ '/dashboard/' | relative_url }}">افتح لوحة التحقيق</a>
+      <a class="btn" href="#التشغيل">التشغيل محليًا</a>
       <a class="btn" href="{{ '/docs/04-evaluation.html' | relative_url }}">النتائج وحدودها</a>
     </div>
   </div>
@@ -29,11 +30,11 @@ layout: default
 
 <section class="wrap shots">
   <h2>لوحة التحقيق</h2>
-  <p class="note">لقطات من اللوحة على بيانات اصطناعية (نطاقات ‎.example/.test‎ لا تُحَلّ).</p>
+  <p class="note">النسخة المنشورة هنا <b>لقطة ثابتة للقراءة</b>: كل ملف فيها استجابة حقيقية من واجهة رصد البرمجية ومحركه، على بيانات <b>اصطناعية</b> (نطاقات ‎.example/.test‎ لا تُحَلّ). فحص الرسائل وفتح التحقيقات والمراقبة الحية تتطلب تشغيل الخادم.</p>
   <div class="gallery">
-    <figure><img src="{{ '/docs/img/campaign.png' | relative_url }}" alt="صفحة حملة: موارد مشتركة ورسم الأدلة" loading="lazy"><figcaption>حملة ورسم أدلتها</figcaption></figure>
-    <figure><img src="{{ '/docs/img/message.png' | relative_url }}" alt="تفسير حكم رسالة: مساهمة كل دليل" loading="lazy"><figcaption>لماذا هذا الحكم؟</figcaption></figure>
-    <figure><img src="{{ '/docs/img/overview.png' | relative_url }}" alt="النظرة العامة" loading="lazy"><figcaption>النظرة العامة</figcaption></figure>
+    <figure><a href="{{ '/dashboard/#campaigns?tab=graph' | relative_url }}"><img src="{{ '/docs/img/campaign-map.png' | relative_url }}" alt="خريطة الحملات: كل حملة ومواردها، والحملات المتشابهة نصًا غير مدموجة" loading="lazy"></a><figcaption>خريطة الحملات — الدليل المباشر مقابل العلاقة المستنتجة</figcaption></figure>
+    <figure><a href="{{ '/dashboard/#messages' | relative_url }}"><img src="{{ '/docs/img/message.png' | relative_url }}" alt="مساحة تحقيق رسالة: مساهمة كل دليل في الدرجة" loading="lazy"></a><figcaption>تحقيق رسالة: لماذا هذا الحكم؟</figcaption></figure>
+    <figure><a href="{{ '/dashboard/#database?tab=schema' | relative_url }}"><img src="{{ '/docs/img/database.png' | relative_url }}" alt="مركز قاعدة البيانات: المخطط الفعلي والعلاقات" loading="lazy"></a><figcaption>قاعدة البيانات الفعلية وعلاقاتها</figcaption></figure>
   </div>
 </section>
 

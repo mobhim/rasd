@@ -104,7 +104,8 @@ def test_api_end_to_end(client):
     link = client.get("/v1/links/explain", headers=h, params={"a": res[0]["message_id"], "b": res[1]["message_id"]}).json()
     assert link["linked"] and link["path"][0]["via"] == "domain:alrajhi-a1.example"
     g = client.get("/v1/graph", headers=h, params={"campaign_id": cid}).json()
-    assert {n["kind"] for n in g["nodes"]} == {"message", "indicator"} and g["edges"]
+    assert {n["kind"] for n in g["nodes"]} >= {"campaign", "message", "indicator"} and g["edges"]
+    assert {(e["kind"], e["direct"]) for e in g["edges"]} >= {("contains", True), ("member", False)}
     assert client.get("/v1/stats", headers=h).json()["campaigns"] == 1
     # tenant isolation
     hb = {"X-API-Key": "k-b"}

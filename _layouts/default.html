@@ -21,6 +21,7 @@
       {% assign docs = "01-research-gap:البحث,02-problem-statement:المشكلة,03-architecture:المعمارية,04-evaluation:التقييم,05-security-privacy:الأمن والخصوصية,06-business-model:النموذج التجاري" | split: "," %}
       {% for d in docs %}{% assign kv = d | split: ":" %}{% assign u = '/docs/' | append: kv[0] %}
       <a href="{{ u | append: '.html' | relative_url }}" {% if here == u %}aria-current="page"{% endif %}>{{ kv[1] }}</a>{% endfor %}
+      <a href="{{ '/dashboard/' | relative_url }}" style="color:var(--accent);font-weight:600">لوحة التحقيق</a>
       <a class="gh" href="https://github.com/mobhim/rasd">GitHub ↗</a>
     </nav>
   </div>

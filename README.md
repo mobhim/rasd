@@ -10,10 +10,11 @@
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[api,eval,dev]"
 
-pytest                                   # 29 tests
+pytest                                   # 42 tests
 rasd analyze "عزيزي العميل تم إيقاف بطاقتك حدث بياناتك https://alrajhi-update.example/login" --sender 0500012345
 rasd seed --db rasd.db                   # synthetic demo data (.example/.test domains only)
 RASD_DB=rasd.db RASD_API_KEYS=my-key:default rasd serve   # dashboard: http://127.0.0.1:8000  API docs: /docs
+rasd export-demo --out dashboard          # static read-only snapshot for GitHub Pages (synthetic data)
 rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # reproduces docs/eval/results_seed7.json
 ```
 
@@ -33,8 +34,25 @@ rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # reproduces docs/
 | تفسير الحكم والربط + الواقع المضاد | `explain` | `src/rasd/xai/` |
 | خصوصية: تنقيح وتجهيل | `redact`, `pseudonymize` | `src/rasd/privacy.py` |
 | API + تصدير STIX 2.1 | FastAPI | `src/rasd/api/`, `src/rasd/integrations/` |
-| لوحة التحقيق | صفحة واحدة بلا اعتماديات | `src/rasd/dashboard/` |
+| لوحة التحقيق: نظرة عامة، رسم الحملات، تحقيق الرسائل، الاستخبارات، قاعدة البيانات، المراقبة | JavaScript بلا أطر ولا اعتماديات | `src/rasd/dashboard/` |
+| مراقبة مقاسة (لا محاكاة) وسجل عمليات | `health`, `Metrics` | `src/rasd/monitor.py` |
+| لقطة ثابتة للنشر دون خادم | `export` | `src/rasd/demo_export.py` |
 | بيئة الاختبار والمقارنة | مولّد + مقاييس + خطوط مرجعية | `src/rasd/eval/` |
+
+## لوحة التحقيق
+
+[افتح النسخة المنشورة](https://mobhim.github.io/rasd/dashboard/). هذه النسخة لقطة ثابتة للقراءة: كل ملف فيها استجابة من الواجهة البرمجية الحقيقية على بيانات **اصطناعية**. مع الخادم (`rasd serve`) تعمل اللوحة على البيانات الحية بكامل وظائفها.
+
+| القسم | ماذا يعرض | مصدره |
+|---|---|---|
+| نظرة عامة | المؤشرات الرئيسية، النشاط اليومي، توزيع الأحكام، إحصاءات الربط. كل رقم يفتح سجلاته | `/v1/overview` |
+| الحملات | قائمة وخريطة تفاعلية: الخط المتصل دليل مباشر، والمتقطع علاقة مستنتجة. الحملات المتشابهة نصًا تُعرض ولا تُدمج | `/v1/campaigns`, `/v1/graph` |
+| تحقيق الرسائل | النص منقّحًا مع تظليل الأدلة، مساهمة كل دليل، التحليل اللغوي، المؤشرات، العلاقات | `/v1/messages/{id}` |
+| الاستخبارات | بحث وتصفية المؤشرات، الكيانات المنتحلة، عائلات القوالب، التحقيقات | `/v1/indicators`, `/v1/entities` |
+| قاعدة البيانات | الجداول الفعلية وأعدادها، المخطط والعلاقات، تصفّح السجلات، فحوص السلامة. **للقراءة فقط** | `/v1/db/*` |
+| مراقبة النظام | فحص المحرك برسالة مرجعية، قاعدة البيانات، زمن بناء الرسم، طلبات الواجهة، موارد العملية، العمليات الفاشلة | `/v1/system/health` |
+
+مصدر كل رسالة (`real` / `synthetic` / `test`) يُسجَّل عند الإدخال ويظهر في كل شاشة.
 
 ## النتائج المقاسة (البذرة 7؛ التفاصيل والحدود في `docs/04-evaluation.md`)
 

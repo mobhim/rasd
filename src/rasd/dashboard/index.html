@@ -3,239 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>رصد — استخبارات التهديدات العربية</title>
-<style>
-:root{--bg:#f5f6f8;--panel:#fff;--ink:#16202c;--mute:#5d6b7b;--line:#dfe4ea;--accent:#0f5fa8;--accent-ink:#fff;
---mal:#b3261e;--mal-bg:#fbe9e7;--sus:#9a5b00;--sus-bg:#fdf1dc;--ben:#1b6e3c;--ben-bg:#e4f4ea;--hl:#fff1b8;--neg:#d7ecff;--chip:#eef1f5;
---n-domain:#0f5fa8;--n-phone:#7a3fb0;--n-iban:#0b7a75;--n-url:#3b78c2;--n-handle:#b0558a;--n-wallet:#8a6d00;--n-email:#55677a}
-@media (prefers-color-scheme:dark){:root{--bg:#10151b;--panel:#18202a;--ink:#e6ebf1;--mute:#95a3b3;--line:#2a3542;--accent:#5aa9ee;--accent-ink:#06121f;
---mal:#ff8a80;--mal-bg:#3a1a18;--sus:#f5c26b;--sus-bg:#3a2c12;--ben:#7fd39c;--ben-bg:#14301f;--hl:#5a4a10;--neg:#143652;--chip:#222c38;
---n-domain:#5aa9ee;--n-phone:#b98be6;--n-iban:#4fc7c0;--n-url:#8db8ea;--n-handle:#e08fbd;--n-wallet:#d9b84a;--n-email:#9fb0c2}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 "Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,sans-serif}
-header{display:flex;align-items:center;gap:20px;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
-h1{font-size:18px;margin:0;font-weight:700}h1 small{font-weight:400;color:var(--mute);font-size:12px;margin-inline-start:8px}
-nav{display:flex;gap:4px;flex-wrap:wrap}nav button{border:0;background:none;color:var(--mute);padding:7px 13px;border-radius:7px;font:inherit;cursor:pointer}
-nav button.on{background:var(--accent);color:var(--accent-ink)}nav button:focus-visible,button:focus-visible,tr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-main{padding:20px;max-width:1280px;margin:auto}.grid{display:grid;gap:14px}.tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
-.card h2{font-size:14px;margin:0 0 10px;color:var(--mute);font-weight:600}.tile b{display:block;font-size:26px;line-height:1.2}.tile span{color:var(--mute);font-size:13px}
-.two{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
-table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:start;color:var(--mute);font-weight:600;font-size:12.5px;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}tr.row{cursor:pointer}tr.row:hover{background:var(--chip)}.scroll{overflow-x:auto}
-.ltr{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,Consolas,monospace;font-size:13px;word-break:break-all}
-.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12.5px;font-weight:600;white-space:nowrap}
-.malicious{color:var(--mal);background:var(--mal-bg)}.suspicious{color:var(--sus);background:var(--sus-bg)}.benign{color:var(--ben);background:var(--ben-bg)}
-.high{color:var(--ben);background:var(--ben-bg)}.medium{color:var(--sus);background:var(--sus-bg)}.low{color:var(--mute);background:var(--chip)}
-.chip{display:inline-block;background:var(--chip);border-radius:6px;padding:0 7px;margin:1px;font-size:12.5px}
-.msg{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:16px;line-height:2}
-mark{background:var(--hl);color:inherit;border-radius:3px;padding:1px 0;cursor:help}mark.neg{background:var(--neg)}
-.reason{display:grid;grid-template-columns:54px 1fr;gap:10px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line)}
-.w{font-family:ui-monospace,monospace;font-size:13px;direction:ltr;text-align:end}.bar{height:5px;border-radius:3px;background:var(--mal);margin-top:3px}.bar.neg{background:var(--accent)}
-.note{color:var(--mute);font-size:13px}.warn{border-inline-start:3px solid var(--sus);padding:6px 10px;background:var(--sus-bg);border-radius:4px;margin:8px 0;font-size:14px}
-input,select,textarea,button.btn{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 10px}
-button.btn{cursor:pointer}button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}textarea{width:100%;min-height:110px}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-svg text{font:11px ui-monospace,monospace;fill:var(--ink)}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin-top:6px}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:4px;vertical-align:-1px}.sq{border-radius:2px}
-.hbar{display:grid;grid-template-columns:minmax(90px,38%) 1fr 40px;gap:8px;align-items:center;font-size:13px;margin:4px 0}.hbar i{display:block;height:9px;border-radius:3px;background:var(--accent)}
-ul.narr{margin:0;padding-inline-start:4px;list-style:none}ul.narr li{margin:3px 0}
-#back{margin-bottom:10px}
-</style>
+<title>رصد · استخبارات التهديدات العربية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/app.css">
 </head>
 <body>
-<header>
-  <h1>رصد <small>Arabic Threat Intelligence</small></h1>
-  <nav id="nav"></nav>
-  <span style="flex:1"></span>
-  <button class="btn" id="keybtn" title="تغيير مفتاح الواجهة البرمجية">مفتاح API</button>
-</header>
-<main id="main" aria-live="polite"></main>
-<script>
-"use strict";
-// Every string that originates from a message is attacker-controlled: it is only ever inserted
-// through esc(). Indicators are rendered as plain text — never as clickable links.
-const $ = (s, r = document) => r.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const V = {malicious: "احتيالية", suspicious: "مشبوهة", benign: "سليمة"};
-const CONF = {high: "مرتفعة", medium: "متوسطة", low: "منخفضة"};
-const TACTIC = {urgency:"استعجال",threat:"تهديد",authority:"صفة رسمية",reward:"جائزة",credential_request:"طلب بيانات سرية",account_update:"تحديث حساب",payment_request:"طلب دفع",action_link:"رابط",action_contact:"تواصل خارجي",secrecy:"سرّية",lure_job:"وظيفة",lure_investment:"استثمار",lure_delivery:"شحنة"};
-const VAR = {msa:"فصحى",gulf:"خليجية",egyptian:"مصرية",levantine:"شامية",maghrebi:"مغاربية",iraqi:"عراقية",en:"إنجليزية",unknown:"غير محدد"};
-const varName = v => v && v.startsWith("msa_mixed_") ? "فصحى + " + (VAR[v.slice(10)] || v.slice(10)) : (VAR[v] || v || "—");
-const TABS = [["overview","نظرة عامة"],["campaigns","الحملات"],["messages","الرسائل"],["families","عائلات القوالب"],["analyze","فحص رسالة"]];
-let key = sessionStorage.getItem("rasd_key") || "";
-
-async function api(path, opts = {}) {
-  if (!key) askKey();
-  const r = await fetch(path, {...opts, headers: {"X-API-Key": key, "Content-Type": "application/json", ...(opts.headers || {})}});
-  if (r.status === 401) { key = ""; sessionStorage.removeItem("rasd_key"); askKey(); return api(path, opts); }
-  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
-  return r.json();
-}
-function askKey() { key = (prompt("أدخل مفتاح API (X-API-Key):") || "").trim(); if (key) sessionStorage.setItem("rasd_key", key); else throw new Error("no key"); }
-$("#keybtn").onclick = () => { sessionStorage.removeItem("rasd_key"); key = ""; route(); };
-
-function nav(active) {
-  $("#nav").innerHTML = TABS.map(([id, t]) => `<button data-t="${id}" class="${id === active ? "on" : ""}">${t}</button>`).join("");
-  $("#nav").querySelectorAll("button").forEach(b => b.onclick = () => { location.hash = b.dataset.t; });
-}
-const pill = (v, map = V) => `<span class="pill ${esc(v)}">${esc(map[v] || v)}</span>`;
-const chips = (obj, map) => Object.keys(obj || {}).map(k => `<span class="chip">${esc((map && map[k]) || k)}${typeof obj[k] === "number" ? " · " + obj[k] : ""}</span>`).join("") || "—";
-const day = s => s ? esc(s.slice(0, 10)) : "—";
-const hbars = rows => { const mx = Math.max(1, ...rows.map(r => r[1])); return rows.map(([l, n, cls]) => `<div class="hbar"><span class="${cls || ""}">${esc(l)}</span><i style="width:${Math.max(2, 100 * n / mx)}%"></i><span>${n}</span></div>`).join("") || '<p class="note">لا بيانات</p>'; };
-function activate(root) { root.querySelectorAll("tr.row").forEach(tr => { tr.tabIndex = 0; const go = () => { location.hash = tr.dataset.go; }; tr.onclick = go; tr.onkeydown = e => { if (e.key === "Enter") go(); }; }); }
-
-// ------------------------------------------------------------------ overview
-async function overview() {
-  const s = await api("/v1/stats");
-  const flagged = (s.by_verdict.malicious || 0) + (s.by_verdict.suspicious || 0);
-  const days = [...new Set(s.by_day.map(d => d.day))];
-  const per = d => ["malicious", "suspicious"].map(v => (s.by_day.find(x => x.day === d && x.verdict === v) || {n: 0}).n);
-  const mx = Math.max(1, ...days.map(d => per(d)[0] + per(d)[1]));
-  const W = 900, H = 150, bw = Math.max(2, W / Math.max(1, days.length) - 2);
-  const bars = days.map((d, i) => { const [m, su] = per(d), x = i * (W / days.length), hm = m / mx * (H - 20), hs = su / mx * (H - 20);
-    return `<g><title>${esc(d)} — احتيالية ${m}، مشبوهة ${su}</title><rect x="${x}" y="${H - hm}" width="${bw}" height="${hm}" fill="var(--mal)"/><rect x="${x}" y="${H - hm - hs}" width="${bw}" height="${hs}" fill="var(--sus)"/></g>`; }).join("");
-  $("#main").innerHTML = `
-  <div class="grid tiles">
-    <div class="card tile"><b>${s.messages}</b><span>رسالة محلَّلة</span></div>
-    <div class="card tile"><b>${flagged}</b><span>رسالة مُشار إليها</span></div>
-    <div class="card tile"><b>${s.campaigns}</b><span>حملة مكتشفة</span></div>
-    <div class="card tile"><b>${s.messages_in_campaigns}</b><span>رسالة ضمن حملات</span></div>
-    <div class="card tile"><b>${s.template_families}</b><span>عائلة قوالب</span></div>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="logo"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#2ad4c4" stroke-width="2.5"/><circle cx="16" cy="16" r="7" fill="none" stroke="#2ad4c4" stroke-opacity=".5" stroke-width="2"/><circle cx="16" cy="16" r="2.6" fill="#2ad4c4"/><path d="M16 16L26 8" stroke="#2ad4c4" stroke-width="2" stroke-linecap="round"/></svg><div>رصد<small>RASD THREAT INTEL</small></div></div>
+    <nav class="nav" id="nav" aria-label="الأقسام"></nav>
+    <div class="side-foot"><b>نكشف الحملة، لا الرسالة وحدها.</b><br>كل رقم هنا محسوب من قاعدة البيانات عبر الواجهة البرمجية.<br><button class="btn ghost" id="logout" style="margin-top:10px;padding:4px 10px">تغيير المفتاح</button></div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="btn ghost menu-btn" id="menu" aria-label="القائمة"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div><h1 id="page-title">رصد</h1><p id="page-sub"></p></div>
+      <span class="grow"></span>
+      <span class="prov" id="prov" hidden></span>
+    </header>
+    <main class="content" id="content"></main>
   </div>
-  <div class="card" style="margin-top:14px"><h2>الرسائل المُشار إليها يوميًا</h2>
-    <div style="direction:ltr"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="الرسائل المشار إليها يوميًا">${bars}<line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="var(--line)"/></svg>
-    <div style="display:flex;justify-content:space-between" class="note"><span>${esc(days[0] || "")}</span><span>${esc(days[days.length - 1] || "")}</span></div></div>
-    <div class="legend"><span><i class="dot sq" style="background:var(--mal)"></i>احتيالية</span><span><i class="dot sq" style="background:var(--sus)"></i>مشبوهة</span></div></div>
-  <div class="grid two" style="margin-top:14px">
-    <div class="card"><h2>الأحكام</h2>${hbars(["malicious", "suspicious", "benign"].map(v => [V[v], s.by_verdict[v] || 0]))}
-      <h2 style="margin-top:14px">ثقة ربط الحملات</h2>${hbars(["high", "medium", "low"].map(v => [CONF[v], s.campaign_confidence[v] || 0]))}</div>
-    <div class="card"><h2>لهجة الرسائل المُشار إليها</h2>${hbars(Object.entries(s.by_variety).sort((a, b) => b[1] - a[1]).map(([k, n]) => [varName(k), n]))}</div>
-    <div class="card"><h2>أكثر المؤشرات تكرارًا في الرسائل المُشار إليها</h2>${hbars(s.top_indicators.map(i => [i.type + ": " + i.value, i.messages, "ltr"]))}</div>
-  </div>`;
-}
-
-// ------------------------------------------------------------------ campaigns
-async function campaigns() {
-  const d = await api("/v1/campaigns");
-  const sup = Object.entries(d.suppressed_indicators);
-  $("#main").innerHTML = `<div class="card"><h2>الحملات المكتشفة (${d.campaigns.length})</h2>
-  <p class="note">الحملة = رسائل يربطها مورد يتحكم به المهاجم (نطاق، رقم تواصل، آيبان، محفظة، حساب). تشابه النص وحده لا يُنشئ حملة.</p>
-  <div class="scroll"><table><thead><tr><th>المعرّف</th><th>الرسائل</th><th>ثقة الربط</th><th>موارد مشتركة</th><th>العلامات المنتحلة</th><th>الأساليب</th><th>أول ظهور</th><th>آخر ظهور</th></tr></thead><tbody>
-  ${d.campaigns.map(c => `<tr class="row" data-go="campaign/${esc(c.id)}"><td class="ltr">${esc(c.id)}</td><td>${c.size}</td><td>${pill(c.confidence, CONF)}</td><td>${c.shared_indicator_count}</td><td>${chips(c.brands)}</td><td>${chips(Object.fromEntries(Object.entries(c.tactics).slice(0, 4)), TACTIC)}</td><td>${day(c.first_seen)}</td><td>${day(c.last_seen)}</td></tr>`).join("") || '<tr><td colspan="8" class="note">لا حملات بعد</td></tr>'}
-  </tbody></table></div></div>
-  ${sup.length ? `<div class="card" style="margin-top:14px"><h2>مؤشرات مُستبعدة من الربط</h2><p class="note">تظهر غالبًا في رسائل سليمة، فلا تُعدّ موردًا خاصًا بمهاجم.</p>${sup.map(([k, why]) => `<div><span class="ltr">${esc(k)}</span> — <span class="note">${esc(why)}</span></div>`).join("")}</div>` : ""}`;
-  activate($("#main"));
-}
-
-function drawGraph(g, el) {
-  const W = 900, H = 520, N = g.nodes.map((n, i) => ({...n, x: W / 2 + 200 * Math.cos(i * 2.4), y: H / 2 + 160 * Math.sin(i * 2.4), vx: 0, vy: 0}));
-  const ix = Object.fromEntries(N.map((n, i) => [n.id, i])), E = g.edges.map(e => [ix[e.source], ix[e.target], e.kind]).filter(e => e[0] != null && e[1] != null);
-  for (let it = 0; it < 400; it++) {
-    const k = 0.9 * (1 - it / 400) + 0.05;
-    for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) { let dx = N[i].x - N[j].x, dy = N[i].y - N[j].y, d2 = dx * dx + dy * dy + 0.01, f = Math.min(8, 700 / d2); dx *= f; dy *= f; N[i].vx += dx; N[i].vy += dy; N[j].vx -= dx; N[j].vy -= dy; }
-    for (const [a, b] of E) { const dx = N[b].x - N[a].x, dy = N[b].y - N[a].y, d = Math.hypot(dx, dy) || 1, f = (d - 110) * 0.05; N[a].vx += dx / d * f; N[a].vy += dy / d * f; N[b].vx -= dx / d * f; N[b].vy -= dy / d * f; }
-    for (const n of N) { n.vx += (W / 2 - n.x) * 0.02; n.vy += (H / 2 - n.y) * 0.03; n.x = Math.min(W - 20, Math.max(20, n.x + n.vx * k)); n.y = Math.min(H - 20, Math.max(20, n.y + n.vy * k)); n.vx *= 0.6; n.vy *= 0.6; }
-  }
-  const col = n => n.kind === "message" ? (n.verdict === "malicious" ? "var(--mal)" : "var(--sus)") : `var(--n-${n.type}, var(--mute))`;
-  el.innerHTML = `<div style="direction:ltr"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="رسم العلاقات بين الرسائل والمؤشرات">
-  ${E.map(([a, b, kind]) => `<line x1="${N[a].x}" y1="${N[a].y}" x2="${N[b].x}" y2="${N[b].y}" stroke="var(--mute)" stroke-opacity=".5" ${kind === "corroborated" ? 'stroke-dasharray="4 4"' : ""}/>`).join("")}
-  ${N.map(n => n.kind === "message"
-    ? `<circle cx="${n.x}" cy="${n.y}" r="6" fill="${col(n)}" data-go="message/${esc(n.id)}" style="cursor:pointer"><title>${esc(n.id)} — ${esc(V[n.verdict])} ${(n.score * 100).toFixed(0)}%</title></circle>`
-    : `<g><rect x="${n.x - 8}" y="${n.y - 8}" width="16" height="16" rx="3" fill="${col(n)}" ${n.bridge ? 'stroke="var(--ink)" stroke-width="2.5"' : ""}><title>${esc(n.id)}${n.bridge ? " — نقطة ربط وحيدة" : ""}</title></rect><text x="${n.x + 11}" y="${n.y + 4}">${esc(n.label.length > 34 ? n.label.slice(0, 33) + "…" : n.label)}</text></g>`).join("")}
-  </svg></div><div class="legend"><span><i class="dot" style="background:var(--mal)"></i>رسالة احتيالية</span><span><i class="dot" style="background:var(--sus)"></i>رسالة مشبوهة</span>
-  ${["domain", "url", "phone", "iban", "handle", "wallet", "email"].filter(t => N.some(n => n.type === t)).map(t => `<span><i class="dot sq" style="background:var(--n-${t})"></i>${t}</span>`).join("")}
-  <span>▣ إطار سميك = مورد لولاه لانقسمت الحملة</span><span>┄ خط متقطع = ربط بإشارتين ضعيفتين</span></div>`;
-  el.querySelectorAll("circle[data-go]").forEach(c => c.onclick = () => { location.hash = c.dataset.go; });
-}
-
-async function campaign(id) {
-  const [d, g] = await Promise.all([api("/v1/campaigns/" + encodeURIComponent(id)), api("/v1/graph?campaign_id=" + encodeURIComponent(id))]);
-  const c = d.campaign, byId = Object.fromEntries(d.messages.map(m => [m.id, m]));
-  const opts = c.message_ids.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
-  $("#main").innerHTML = `<button class="btn" id="back">→ كل الحملات</button>
-  <div class="grid two">
-   <div class="card"><h2>الحملة <span class="ltr">${esc(c.id)}</span> ${pill(c.confidence, CONF)}</h2>
-     <ul class="narr">${d.explanation.narrative.map(l => `<li>${esc(l)}</li>`).join("")}</ul>
-     <p class="note">${day(c.first_seen)} ← ${day(c.last_seen)} · اللهجات: ${chips(c.varieties, Object.fromEntries(Object.keys(c.varieties).map(k => [k, varName(k)])))}</p>
-     <p>الأساليب: ${chips(c.tactics, TACTIC)}</p>
-     <div class="toolbar"><button class="btn pri" id="stix">تصدير STIX 2.1</button></div></div>
-   <div class="card"><h2>موارد الحملة (مؤشرات الاختراق)</h2><div class="scroll"><table><thead><tr><th>النوع</th><th>القيمة</th><th>الرسائل</th></tr></thead><tbody>
-     ${c.indicators.map(i => `<tr><td>${esc(i.type)}</td><td class="ltr">${esc(i.value)}${c.bridges.includes(i.key) ? ' <span class="chip">نقطة ربط وحيدة</span>' : ""}</td><td>${i.messages}</td></tr>`).join("")}</tbody></table></div></div>
-  </div>
-  <div class="card" style="margin-top:14px"><h2>رسم الأدلة</h2><div id="graph"></div></div>
-  <div class="card" style="margin-top:14px"><h2>لماذا رُبطت هاتان الرسالتان؟</h2>
-    <div class="toolbar"><select id="la" aria-label="الرسالة الأولى">${opts}</select><select id="lb" aria-label="الرسالة الثانية">${opts}</select><button class="btn" id="why">اشرح سلسلة الأدلة</button></div><div id="whyout"></div></div>
-  <div class="card" style="margin-top:14px"><h2>رسائل الحملة (${c.size})</h2><div class="scroll"><table><tbody>
-    ${c.message_ids.map(m => `<tr class="row" data-go="message/${esc(m)}"><td>${day(byId[m]?.received_at)}</td><td>${pill(byId[m]?.verdict || "suspicious")}</td><td>${esc((byId[m]?.text || m).slice(0, 150))}</td></tr>`).join("")}</tbody></table></div></div>`;
-  $("#back").onclick = () => { location.hash = "campaigns"; };
-  if ($("#lb").options.length > 1) $("#lb").selectedIndex = $("#lb").options.length - 1;
-  drawGraph(g, $("#graph")); activate($("#main"));
-  $("#stix").onclick = async () => { const b = await api(`/v1/campaigns/${encodeURIComponent(id)}/stix`); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], {type: "application/json"})); a.download = id + ".stix.json"; a.click(); };
-  $("#why").onclick = async () => { const r = await api(`/v1/links/explain?a=${encodeURIComponent($("#la").value)}&b=${encodeURIComponent($("#lb").value)}`);
-    $("#whyout").innerHTML = r.linked ? `<ol>${r.path.map(h => `<li><span class="ltr">${esc(h.from)}</span> ← <span class="chip ltr">${esc(h.via)}</span> (${h.kind === "hard" ? "دليل قوي" : "إشارتان ضعيفتان معًا"}، قوة ${h.strength}) ← <span class="ltr">${esc(h.to)}</span></li>`).join("")}</ol><p class="note">قوة السلسلة = أضعف حلقة: ${r.chain_strength}</p>` : `<div class="warn">لا توجد سلسلة أدلة كافية تربط الرسالتين.</div>`; };
-}
-
-// ------------------------------------------------------------------ messages
-function highlight(text, evidence) {
-  const best = new Array(text.length).fill(null);
-  for (const e of evidence) if (e.weight) for (const s of e.spans) for (let i = s.start; i < Math.min(s.end, text.length); i++) if (!best[i] || Math.abs(e.weight) > Math.abs(best[i].weight)) best[i] = e;
-  let out = "", i = 0;
-  while (i < text.length) { let j = i; while (j < text.length && best[j] === best[i]) j++; const seg = esc(text.slice(i, j));
-    out += best[i] ? `<mark class="${best[i].weight < 0 ? "neg" : ""}" title="${esc(best[i].text || best[i].id)} (${best[i].weight > 0 ? "+" : ""}${best[i].weight})">${seg}</mark>` : seg; i = j; }
-  return out;
-}
-function analysisView(text, a, ex, extra = "") {
-  const byId = Object.fromEntries(ex.reasons.map(r => [r.id, r.text]));
-  const ev = a.evidence.map(e => ({...e, text: byId[e.id]}));
-  const mx = Math.max(1, ...ex.reasons.map(r => Math.abs(r.weight)));
-  return `<div class="grid two">
-  <div class="card"><h2>الرسالة ${pill(a.verdict)} <span class="note">درجة الخطر ${(a.score * 100).toFixed(1)}%</span></h2>
-    <div class="msg" dir="auto">${highlight(text, ev)}</div>
-    <p class="note">مرّر المؤشر فوق الأجزاء المظلّلة لمعرفة الدليل المرتبط بها.</p>
-    <p>${esc(ex.summary)}</p>${ex.guard ? `<div class="warn">${esc(ex.guard)}</div>` : ""}
-    <p class="note">اللغة: ${esc(a.language)} · التنوّع اللغوي: ${esc(varName(a.variety.label))}${(a.variety.markers[a.variety.label] || []).length ? " (علامات: " + esc(a.variety.markers[a.variety.label].slice(0, 6).join("، ")) + ")" : ""} · سياسة التقييم: <span class="ltr">${esc(a.policy_version)}</span></p>${extra}</div>
-  <div class="card"><h2>لماذا هذا الحكم؟ (مساهمة كل دليل في الدرجة)</h2>
-    ${ex.reasons.map(r => `<div class="reason"><div class="w">${r.weight > 0 ? "+" : ""}${r.weight.toFixed(2)}</div><div>${esc(r.text)}${r.source === "advisory" ? ' <span class="chip">استشاري</span>' : ""}<div class="bar ${r.weight < 0 ? "neg" : ""}" style="width:${100 * Math.abs(r.weight) / mx}%"></div></div></div>`).join("") || '<p class="note">لا أدلة ذات وزن.</p>'}
-    <p class="note ltr">score = sigmoid(${a.bias} + Σ weights) = sigmoid(${a.logit})</p>
-    ${ex.counterfactual ? `<p><b>هشاشة الحكم:</b> يتغيّر الحكم إذا سقطت الأدلة التالية: ${ex.counterfactual.remove_to_change_verdict.map(i => `<span class="chip">${esc(byId[i] || i)}</span>`).join("")}</p>` : ""}
-    <h2 style="margin-top:14px">المؤشرات المستخرجة</h2><div class="scroll"><table><tbody>
-    ${a.indicators.map(i => `<tr><td>${esc(i.type)}${i.role === "sender" ? " (مرسل)" : ""}</td><td class="ltr">${esc(i.value)}</td><td class="note">${i.linkable ? "" : "لا يُستخدم للربط"}</td></tr>`).join("") || '<tr><td class="note">لا مؤشرات</td></tr>'}</tbody></table></div></div></div>`;
-}
-async function messages() {
-  $("#main").innerHTML = `<div class="card"><div class="toolbar"><select id="fv" aria-label="تصفية حسب الحكم"><option value="">كل الأحكام</option><option value="malicious">احتيالية</option><option value="suspicious">مشبوهة</option><option value="benign">سليمة</option></select>
-    <input id="fq" placeholder="بحث في النص" aria-label="بحث في النص"><button class="btn" id="go">بحث</button></div><div class="scroll"><table><thead><tr><th>التاريخ</th><th>الحكم</th><th>الدرجة</th><th>اللهجة</th><th>الحملة</th><th>النص (منقّح)</th></tr></thead><tbody id="rows"></tbody></table></div></div>`;
-  const load = async () => { const d = await api(`/v1/messages?limit=200${$("#fv").value ? "&verdict=" + $("#fv").value : ""}${$("#fq").value ? "&q=" + encodeURIComponent($("#fq").value) : ""}`);
-    $("#rows").innerHTML = d.messages.map(m => `<tr class="row" data-go="message/${esc(m.id)}"><td>${day(m.received_at)}</td><td>${pill(m.verdict)}</td><td>${(m.score * 100).toFixed(0)}%</td><td>${esc(varName(m.variety))}</td><td class="ltr">${esc(m.campaign_id || "—")}</td><td>${esc(m.text.slice(0, 140))}</td></tr>`).join("") || '<tr><td colspan="6" class="note">لا نتائج</td></tr>'; activate($("#main")); };
-  $("#go").onclick = load; $("#fv").onchange = load; $("#fq").onkeydown = e => { if (e.key === "Enter") load(); }; load();
-}
-async function message(id) {
-  const m = await api("/v1/messages/" + encodeURIComponent(id));
-  const extra = `<p class="note">المعرّف: <span class="ltr">${esc(m.id)}</span> · القناة: ${esc(m.channel)} · ${day(m.received_at)}${m.campaign_id ? ` · <a href="#campaign/${esc(m.campaign_id)}">الحملة ${esc(m.campaign_id)}</a>` : ""}</p><p class="note">النص المخزَّن منقّح: أرقام البطاقات والرموز والهويات مطموسة، ورقم المستلم مُستبدل بمعرّف مجهول.</p>`;
-  $("#main").innerHTML = `<button class="btn" id="back">→ رجوع</button>` + analysisView(m.text, m.analysis, m.explanation, extra);
-  $("#back").onclick = () => history.back();
-}
-async function families() {
-  const d = await api("/v1/template-families");
-  $("#main").innerHTML = `<div class="card"><h2>عائلات القوالب (${d.template_families.length})</h2>
-  <div class="warn">دليل ضعيف: هذه رسائل تتشارك النص نفسه تقريبًا. قد تكون جهة واحدة تبدّل أرقامها، أو جهات مختلفة تنسخ القالب ذاته. لا تُعامل كحملة واحدة دون مورد مشترك.</div>
-  <div class="scroll"><table><thead><tr><th>المعرّف</th><th>الرسائل</th><th>موارد مختلفة</th><th>حملات مرتبطة</th><th>رسائل غير مربوطة</th><th>العلامات</th></tr></thead><tbody>
-  ${d.template_families.map(f => `<tr class="row" data-go="message/${esc(f.message_ids[0])}"><td class="ltr">${esc(f.id)}</td><td>${f.size}</td><td>${f.distinct_hard_indicators}</td><td>${f.campaign_ids.map(c => `<a class="ltr" href="#campaign/${esc(c)}">${esc(c)}</a>`).join(" ") || "—"}</td><td>${f.unlinked_messages}</td><td>${f.brands.map(b => `<span class="chip">${esc(b)}</span>`).join("") || "—"}</td></tr>`).join("") || '<tr><td colspan="6" class="note">لا عائلات</td></tr>'}</tbody></table></div></div>`;
-  activate($("#main"));
-}
-function analyze() {
-  $("#main").innerHTML = `<div class="card"><h2>فحص رسالة (لا تُخزَّن)</h2><textarea id="tx" dir="auto" placeholder="الصق نص الرسالة هنا" aria-label="نص الرسالة"></textarea>
-  <div class="toolbar" style="margin-top:8px"><input id="sn" placeholder="المرسل (اختياري)" class="ltr" aria-label="المرسل"><button class="btn pri" id="run">حلّل</button></div></div><div id="out" style="margin-top:14px"></div>`;
-  $("#run").onclick = async () => { const text = $("#tx").value; if (!text.trim()) return;
-    try { const r = await api("/v1/analyze", {method: "POST", body: JSON.stringify({text, sender: $("#sn").value || null})}); $("#out").innerHTML = analysisView(text, r.analysis, r.explanation); }
-    catch (e) { $("#out").innerHTML = `<div class="warn">${esc(e.message)}</div>`; } };
-}
-async function route() {
-  const [tab, arg] = (location.hash.slice(1) || "overview").split("/");
-  nav({campaign: "campaigns", message: "messages"}[tab] || tab);
-  try { await ({overview, campaigns, messages, families, analyze, campaign: () => campaign(decodeURIComponent(arg)), message: () => message(decodeURIComponent(arg))}[tab] || overview)(); }
-  catch (e) { $("#main").innerHTML = `<div class="warn">${esc(e.message)}</div>`; }
-}
-addEventListener("hashchange", route); route();
-</script>
+</div>
+<div class="drawer-bg" id="drawer-bg"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-labelledby="drawer-title">
+  <header><h3 id="drawer-title"></h3><button class="btn ghost" id="drawer-close" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div class="body" id="drawer-body"></div>
+</aside>
+<script src="static/core.js"></script>
+<script src="static/views.js"></script>
 </body>
 </html>

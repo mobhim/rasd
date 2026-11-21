@@ -16,6 +16,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--host", default="127.0.0.1"); s.add_argument("--port", type=int, default=8000)
     d = sub.add_parser("seed", help="load the synthetic test-bench corpus into a database (demo data, clearly synthetic)")
     d.add_argument("--db", default="rasd.db"); d.add_argument("--tenant", default="default"); d.add_argument("--seed", type=int, default=7)
+    x = sub.add_parser("export-demo", help="write a static, read-only snapshot of the dashboard API (synthetic data) for static hosting")
+    x.add_argument("--out", required=True); x.add_argument("--seed", type=int, default=7)
     e = sub.add_parser("eval", help="run the evaluation harness and print the report")
     e.add_argument("--seed", type=int, default=7); e.add_argument("--out"); e.add_argument("--external")
     args = ap.parse_args(argv)
@@ -51,8 +53,14 @@ def main(argv: list[str] | None = None) -> int:
         r = Rasd(store=Store(args.db))
         corpus = generate(seed=args.seed)
         for m in corpus:
-            r.ingest(args.tenant, Message(m["text"], id=m["id"], sender=m["sender"], channel=m["channel"], received_at=m["received_at"]))
+            r.ingest(args.tenant, Message(m["text"], id=m["id"], sender=m["sender"], channel=m["channel"],
+                                          received_at=m["received_at"], source="synthetic"))
         print(f"seeded {len(corpus)} synthetic messages into {args.db}; campaigns found: {len(r.graph(args.tenant).campaigns)}")
+        return 0
+    if args.cmd == "export-demo":
+        from .demo_export import export
+        n = export(args.out, seed=args.seed)
+        print(f"wrote {n} snapshot files to {args.out}")
         return 0
     if args.cmd == "eval":
         from .eval.run import main as run_eval

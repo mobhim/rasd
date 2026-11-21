@@ -88,6 +88,7 @@ class Message:
     recipient: str | None = None    # victim side — pseudonymised before storage
     channel: str = "sms"            # sms | whatsapp | telegram | email | other
     received_at: str | None = None  # ISO-8601
+    source: str = "unspecified"     # data provenance: real | synthetic | test | unspecified
 
 
 @dataclass

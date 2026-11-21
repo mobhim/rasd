@@ -338,30 +338,66 @@ class CampaignGraph:
                 "chain_strength": round(min(h["strength"] for h in path), 2)}
 
     def subgraph(self, cid: str | None = None, limit: int = 400) -> dict:
-        """Bipartite message/indicator graph for visualisation."""
+        """Investigation graph.
+
+        With `cid`: the campaign, its messages, every actor-controlled resource
+        they contain and the brands they mention. Without: one node per
+        campaign, the resources it shares, and weak same-template links between
+        campaigns (shown, never merged).
+
+        Every edge says whether it is DIRECT evidence (the value literally
+        appears in the message) or INFERRED (membership, corroborated weak
+        signals, template similarity)."""
+        nodes: dict[str, dict] = {}
+        edges: list[dict] = []
+
+        def node(nid: str, **kw) -> None:
+            if nid not in nodes and len(nodes) < limit:
+                nodes[nid] = {"id": nid, **kw}
+
+        def edge(a: str, b: str, kind: str, direct: bool, label: str, **kw) -> None:
+            if a in nodes and b in nodes:
+                edges.append({"source": a, "target": b, "kind": kind, "direct": direct, "label": label, **kw})
+
         camps = [c for c in self.campaigns if cid is None or c["id"] == cid]
-        nodes, edges, seen = [], [], set()
         for c in camps:
-            shared = {d["key"] for d in c["indicators"] if d["messages"] >= 2 or cid}
+            cn = "cmp:" + c["id"]
+            node(cn, kind="campaign", label=c["id"], size=c["size"], confidence=c["confidence"])
+            shared = {d["key"] for d in c["indicators"] if d["messages"] >= 2} if cid is None else {d["key"] for d in c["indicators"]}
+            for d in c["indicators"]:
+                if d["key"] in shared:
+                    node("ind:" + d["key"], kind="indicator", type=d["type"], label=d["value"], key=d["key"],
+                         messages=d["messages"], bridge=d["key"] in c["bridges"])
+                    if cid is None:
+                        edge(cn, "ind:" + d["key"], "uses", True,
+                             f"{d['messages']} messages of this campaign contain it", messages=d["messages"])
+            for b, n in c["brands"].items():
+                node("ent:" + b, kind="entity", type="brand", label=b)
+                edge(cn, "ent:" + b, "mentions", True, f"named in {n} messages (impersonation target, not a link)", messages=n)
+            if cid is None:
+                continue
             for mid in c["message_ids"]:
-                if len(nodes) >= limit:
-                    break
                 m = self.nodes[mid]
-                nodes.append({"id": mid, "kind": "message", "campaign": c["id"], "verdict": m.verdict, "score": m.score})
+                mn = "msg:" + mid
+                node(mn, kind="message", label=mid, verdict=m.verdict, score=m.score)
+                edge(mn, cn, "member", False, "member of the campaign (derived from the evidence edges)")
                 for i in m.indicators:
-                    if i["key"] in shared and i["role"] == "body":
-                        if i["key"] not in seen:
-                            seen.add(i["key"])
-                            nodes.append({"id": i["key"], "kind": "indicator", "type": i["type"], "label": i["value"],
-                                          "campaign": c["id"], "bridge": i["key"] in c["bridges"]})
-                        edges.append({"source": mid, "target": i["key"], "kind": "hard"})
+                    if i["role"] == "body" and "ind:" + i["key"] in nodes:
+                        edge(mn, "ind:" + i["key"], "contains", True, "value appears in the message text")
             for mid in c["message_ids"]:
                 for y, evs in self._adj[mid].items():
-                    if mid < y and all(k == "corroborated" for _, k, _ in evs):
-                        edges.append({"source": mid, "target": y, "kind": "corroborated", "via": evs[0][0]})
-        ids = {n["id"] for n in nodes}
-        return {"nodes": nodes, "edges": [e for e in edges if e["source"] in ids and e["target"] in ids]}
-
+                    if mid < y and evs and all(k == "corroborated" for _, k, _ in evs):
+                        edge("msg:" + mid, "msg:" + y, "corroborated", False,
+                             "two independent weak signals together: " + evs[0][0], strength=evs[0][2])
+        if cid is None:
+            for c in camps:
+                for r in c["related"]:
+                    if c["id"] < r["campaign_id"]:
+                        edge("cmp:" + c["id"], "cmp:" + r["campaign_id"], "same_template", False,
+                             "similar text, different infrastructure — NOT merged (weak evidence)")
+        ids = set(nodes)
+        return {"nodes": list(nodes.values()), "edges": [e for e in edges if e["source"] in ids and e["target"] in ids],
+                "truncated": len(nodes) >= limit}
 
 def _count(vals) -> dict:
     out: dict = {}

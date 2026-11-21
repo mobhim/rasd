@@ -30,7 +30,8 @@ class Rasd:
         text, redactions = redact(msg.text, a.indicators)
         d = a.to_dict()
         d["redactions"] = redactions
-        self.store.add(tenant, d, text, msg.received_at, msg.channel, pseudonymize(msg.recipient, self.pseudonym_key))
+        self.store.add(tenant, d, text, msg.received_at, msg.channel, pseudonymize(msg.recipient, self.pseudonym_key),
+                       msg.source)
         return d
 
     def graph(self, tenant: str) -> CampaignGraph:
