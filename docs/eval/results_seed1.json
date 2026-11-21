@@ -1,0 +1,293 @@
+{
+  "seed": 1,
+  "corpus": {
+    "type": "synthetic (rasd.eval.generator)",
+    "messages": 1129,
+    "malicious": 509,
+    "campaigns": 36
+  },
+  "prior_policy": "prior-0.3",
+  "detection": {
+    "split": {
+      "type": "template-family-disjoint (test templates never seen in training)",
+      "train": 565,
+      "test": 564,
+      "test_positive": 248
+    },
+    "rasd_prior_flagged": {
+      "n": 564,
+      "tp": 248,
+      "fp": 0,
+      "fn": 0,
+      "tn": 316,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0,
+      "f1_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "rasd_prior_malicious_only": {
+      "n": 564,
+      "tp": 176,
+      "fp": 0,
+      "fn": 72,
+      "tn": 316,
+      "precision": 1.0,
+      "recall": 0.7097,
+      "f1": 0.8302,
+      "fpr": 0.0,
+      "f1_ci95": [
+        0.7897,
+        0.8677
+      ]
+    },
+    "rasd_calibrated_flagged": {
+      "n": 564,
+      "tp": 248,
+      "fp": 0,
+      "fn": 0,
+      "tn": 316,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0,
+      "f1_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "baseline_keywords": {
+      "n": 564,
+      "tp": 132,
+      "fp": 10,
+      "fn": 116,
+      "tn": 306,
+      "precision": 0.9296,
+      "recall": 0.5323,
+      "f1": 0.6769,
+      "fpr": 0.0316,
+      "f1_ci95": [
+        0.6175,
+        0.7308
+      ]
+    },
+    "baseline_tfidf_lr_unseen_templates": {
+      "n": 564,
+      "tp": 236,
+      "fp": 85,
+      "fn": 12,
+      "tn": 231,
+      "precision": 0.7352,
+      "recall": 0.9516,
+      "f1": 0.8295,
+      "fpr": 0.269,
+      "f1_ci95": [
+        0.797,
+        0.86
+      ]
+    },
+    "baseline_tfidf_lr_random_split": {
+      "n": 565,
+      "tp": 253,
+      "fp": 0,
+      "fn": 1,
+      "tn": 311,
+      "precision": 1.0,
+      "recall": 0.9961,
+      "f1": 0.998,
+      "fpr": 0.0,
+      "f1_ci95": [
+        0.9938,
+        1.0
+      ]
+    },
+    "slices": {
+      "obfuscated_malicious": {
+        "n": 68,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.9265
+      },
+      "clean_malicious": {
+        "n": 180,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.9611
+      },
+      "malicious_egyptian": {
+        "n": 31,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 1.0
+      },
+      "malicious_gulf": {
+        "n": 69,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 1.0
+      },
+      "malicious_levantine": {
+        "n": 1,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 1.0
+      },
+      "malicious_maghrebi": {
+        "n": 5,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 1.0
+      },
+      "malicious_msa": {
+        "n": 142,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.9155
+      }
+    },
+    "rasd_false_positive_kinds": {},
+    "rasd_missed_kinds": {},
+    "calibrated_policy_top_weights": {
+      "combo.lure_offplatform_contact": 3.7464,
+      "tactic.lure_job": 2.3846,
+      "context.org_claim_from_personal_number": 1.8784,
+      "context.brand_link_mismatch": 1.7743,
+      "context.org_claim_personal_contact": 1.6136,
+      "combo.threat_with_vector": 1.5558,
+      "tactic.action_contact": 1.362,
+      "payment.crypto_wallet": 1.3618,
+      "tactic.lure_investment": 1.3618,
+      "context.register_mismatch": 1.1788,
+      "combo.reward_with_vector": 1.1714,
+      "tactic.reward": 1.1714
+    }
+  },
+  "campaigns": {
+    "n_malicious": 509,
+    "true_campaigns": 36,
+    "note": "clusters scored over all truly malicious messages; a message the detector missed counts as an unlinked singleton",
+    "rasd_end_to_end": {
+      "n": 509,
+      "true_clusters": 96,
+      "pred_clusters": 103,
+      "pair_precision": 1.0,
+      "pair_recall": 0.9769,
+      "pair_f1": 0.9883,
+      "ari": 0.988,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.9749,
+      "bcubed_f1": 0.9873
+    },
+    "rasd_confidence_levels": {
+      "medium": 29,
+      "high": 8
+    },
+    "rasd_campaigns_containing_benign": 0,
+    "rasd_benign_messages_in_campaigns": 0,
+    "rasd_oracle_detection": {
+      "n": 509,
+      "true_clusters": 96,
+      "pred_clusters": 103,
+      "pair_precision": 1.0,
+      "pair_recall": 0.9769,
+      "pair_f1": 0.9883,
+      "ari": 0.988,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.9749,
+      "bcubed_f1": 0.9873
+    },
+    "rasd_hard_evidence_only": {
+      "n": 509,
+      "true_clusters": 96,
+      "pred_clusters": 121,
+      "pair_precision": 1.0,
+      "pair_recall": 0.8711,
+      "pair_f1": 0.9311,
+      "ari": 0.9297,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.8839,
+      "bcubed_f1": 0.9384
+    },
+    "ablation_template_alone_links": {
+      "n": 509,
+      "true_clusters": 96,
+      "pred_clusters": 28,
+      "pair_precision": 0.2004,
+      "pair_recall": 0.9947,
+      "pair_f1": 0.3336,
+      "ari": 0.3082,
+      "bcubed_precision": 0.3363,
+      "bcubed_recall": 0.9931,
+      "bcubed_f1": 0.5025
+    },
+    "baseline_exact_ioc_match": {
+      "n": 509,
+      "true_clusters": 96,
+      "pred_clusters": 344,
+      "pair_precision": 1.0,
+      "pair_recall": 0.2269,
+      "pair_f1": 0.3699,
+      "ari": 0.3647,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.3754,
+      "bcubed_f1": 0.5459
+    },
+    "baseline_text_similarity_sweep": {
+      "0.5": {
+        "pair_precision": 0.2476,
+        "pair_recall": 0.7973,
+        "pair_f1": 0.3778,
+        "ari": 0.3561,
+        "bcubed_f1": 0.5555,
+        "pred_clusters": 43
+      },
+      "0.6": {
+        "pair_precision": 0.4172,
+        "pair_recall": 0.6817,
+        "pair_f1": 0.5176,
+        "ari": 0.504,
+        "bcubed_f1": 0.6619,
+        "pred_clusters": 66
+      },
+      "0.7": {
+        "pair_precision": 0.6043,
+        "pair_recall": 0.555,
+        "pair_f1": 0.5786,
+        "ari": 0.5695,
+        "bcubed_f1": 0.6805,
+        "pred_clusters": 122
+      },
+      "0.8": {
+        "pair_precision": 0.7839,
+        "pair_recall": 0.3582,
+        "pair_f1": 0.4917,
+        "ari": 0.4846,
+        "bcubed_f1": 0.626,
+        "pred_clusters": 194
+      },
+      "0.9": {
+        "pair_precision": 0.9705,
+        "pair_recall": 0.2076,
+        "pair_f1": 0.3421,
+        "ari": 0.3369,
+        "bcubed_f1": 0.5261,
+        "pred_clusters": 283
+      }
+    },
+    "baseline_text_similarity_best": {
+      "threshold": 0.7,
+      "tuned_on_test_labels": true,
+      "n": 509,
+      "true_clusters": 96,
+      "pred_clusters": 122,
+      "pair_precision": 0.6043,
+      "pair_recall": 0.555,
+      "pair_f1": 0.5786,
+      "ari": 0.5695,
+      "bcubed_precision": 0.7501,
+      "bcubed_recall": 0.6227,
+      "bcubed_f1": 0.6805
+    }
+  },
+  "throughput": {
+    "messages": 1129,
+    "analyze_msgs_per_sec_single_core": 326.0,
+    "graph_build_seconds": 0.016
+  }
+}

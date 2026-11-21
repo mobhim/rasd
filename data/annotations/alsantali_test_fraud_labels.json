@@ -1,0 +1,14 @@
+{
+  "dataset": "KhalidAlsantali/Arabic-SMS-Spam-Data (GPL-3.0) — texts are NOT redistributed here; ids index the de-duplicated file order used by rasd.eval.external_split.load()",
+  "scope": "spam-labelled messages of the held-out TEST half only (73 messages)",
+  "annotator": "single annotator (RASD engineering), annotated AFTER the engine and lexicon were frozen (commit b986ee3) and WITHOUT seeing system verdicts. Not expert-adjudicated; no inter-annotator agreement available.",
+  "criteria": {
+    "fraud_clear": "impersonates an institution and pushes a callback number / link, or announces a prize to be claimed by contacting the sender",
+    "fraud_probable": "bait lure (investment, extra salary, fake government jobs, fake brand giveaway) behind an opaque link, no identifiable legitimate merchant",
+    "ambiguous": "cannot be decided from the text alone",
+    "marketing": "promotion by an identifiable merchant — unwanted perhaps, but not fraud; out of RASD's scope"
+  },
+  "fraud_clear": ["ext-0", "ext-1", "ext-11", "ext-15", "ext-16", "ext-17", "ext-19", "ext-127", "ext-128", "ext-132", "ext-134", "ext-139", "ext-142", "ext-144", "ext-149"],
+  "fraud_probable": ["ext-135", "ext-138", "ext-141", "ext-146", "ext-147"],
+  "ambiguous": ["ext-2"]
+}

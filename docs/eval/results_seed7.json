@@ -1,0 +1,479 @@
+{
+  "seed": 7,
+  "corpus": {
+    "type": "synthetic (rasd.eval.generator)",
+    "messages": 1074,
+    "malicious": 454,
+    "campaigns": 36
+  },
+  "prior_policy": "prior-0.3",
+  "detection": {
+    "split": {
+      "type": "template-family-disjoint (test templates never seen in training)",
+      "train": 552,
+      "test": 522,
+      "test_positive": 284
+    },
+    "rasd_prior_flagged": {
+      "n": 522,
+      "tp": 284,
+      "fp": 15,
+      "fn": 0,
+      "tn": 223,
+      "precision": 0.9498,
+      "recall": 1.0,
+      "f1": 0.9743,
+      "fpr": 0.063,
+      "f1_ci95": [
+        0.9607,
+        0.9863
+      ]
+    },
+    "rasd_prior_malicious_only": {
+      "n": 522,
+      "tp": 161,
+      "fp": 0,
+      "fn": 123,
+      "tn": 238,
+      "precision": 1.0,
+      "recall": 0.5669,
+      "f1": 0.7236,
+      "fpr": 0.0,
+      "f1_ci95": [
+        0.67,
+        0.7667
+      ]
+    },
+    "rasd_calibrated_flagged": {
+      "n": 522,
+      "tp": 202,
+      "fp": 0,
+      "fn": 82,
+      "tn": 238,
+      "precision": 1.0,
+      "recall": 0.7113,
+      "f1": 0.8313,
+      "fpr": 0.0,
+      "f1_ci95": [
+        0.7918,
+        0.8661
+      ]
+    },
+    "baseline_keywords": {
+      "n": 522,
+      "tp": 86,
+      "fp": 9,
+      "fn": 198,
+      "tn": 229,
+      "precision": 0.9053,
+      "recall": 0.3028,
+      "f1": 0.4538,
+      "fpr": 0.0378,
+      "f1_ci95": [
+        0.3894,
+        0.5131
+      ]
+    },
+    "baseline_tfidf_lr_unseen_templates": {
+      "n": 522,
+      "tp": 160,
+      "fp": 0,
+      "fn": 124,
+      "tn": 238,
+      "precision": 1.0,
+      "recall": 0.5634,
+      "f1": 0.7207,
+      "fpr": 0.0,
+      "f1_ci95": [
+        0.6682,
+        0.7654
+      ]
+    },
+    "baseline_tfidf_lr_random_split": {
+      "n": 537,
+      "tp": 241,
+      "fp": 0,
+      "fn": 0,
+      "tn": 296,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "fpr": 0.0,
+      "f1_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "slices": {
+      "obfuscated_malicious": {
+        "n": 67,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.5522
+      },
+      "clean_malicious": {
+        "n": 217,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.5668
+      },
+      "malicious_egyptian": {
+        "n": 49,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.5306
+      },
+      "malicious_gulf": {
+        "n": 101,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.6535
+      },
+      "malicious_levantine": {
+        "n": 8,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.75
+      },
+      "malicious_msa": {
+        "n": 126,
+        "rasd_recall": 1.0,
+        "tfidf_recall": 0.4921
+      }
+    },
+    "rasd_false_positive_kinds": {
+      "benign:telecom": 15
+    },
+    "rasd_missed_kinds": {},
+    "calibrated_policy_top_weights": {
+      "combo.lure_offplatform_contact": 3.4206,
+      "tactic.lure_job": 2.1776,
+      "context.org_claim_from_personal_number": 2.1562,
+      "context.brand_link_mismatch": 1.7873,
+      "context.register_mismatch": 1.2236,
+      "context.org_claim_personal_contact": 1.2189,
+      "url.sensitive_keyword": 1.194,
+      "url.brand_impersonation": 1.1928,
+      "combo.reward_with_vector": 1.1627,
+      "combo.threat_with_vector": 1.1627,
+      "tactic.reward": 1.1627,
+      "tactic.action_link": 1.0859
+    }
+  },
+  "campaigns": {
+    "n_malicious": 454,
+    "true_campaigns": 36,
+    "note": "clusters scored over all truly malicious messages; a message the detector missed counts as an unlinked singleton",
+    "rasd_end_to_end": {
+      "n": 454,
+      "true_clusters": 96,
+      "pred_clusters": 115,
+      "pair_precision": 0.9935,
+      "pair_recall": 0.9275,
+      "pair_f1": 0.9594,
+      "ari": 0.9585,
+      "bcubed_precision": 0.9959,
+      "bcubed_recall": 0.9498,
+      "bcubed_f1": 0.9723
+    },
+    "rasd_confidence_levels": {
+      "medium": 26,
+      "high": 9
+    },
+    "rasd_campaigns_containing_benign": 0,
+    "rasd_benign_messages_in_campaigns": 0,
+    "rasd_oracle_detection": {
+      "n": 454,
+      "true_clusters": 96,
+      "pred_clusters": 115,
+      "pair_precision": 0.9935,
+      "pair_recall": 0.9275,
+      "pair_f1": 0.9594,
+      "ari": 0.9585,
+      "bcubed_precision": 0.9959,
+      "bcubed_recall": 0.9498,
+      "bcubed_f1": 0.9723
+    },
+    "rasd_hard_evidence_only": {
+      "n": 454,
+      "true_clusters": 96,
+      "pred_clusters": 126,
+      "pair_precision": 0.9929,
+      "pair_recall": 0.8537,
+      "pair_f1": 0.9181,
+      "ari": 0.9164,
+      "bcubed_precision": 0.9959,
+      "bcubed_recall": 0.8876,
+      "bcubed_f1": 0.9386
+    },
+    "ablation_template_alone_links": {
+      "n": 454,
+      "true_clusters": 96,
+      "pred_clusters": 34,
+      "pair_precision": 0.2198,
+      "pair_recall": 0.9714,
+      "pair_f1": 0.3585,
+      "ari": 0.3341,
+      "bcubed_precision": 0.4033,
+      "bcubed_recall": 0.9829,
+      "bcubed_f1": 0.5719
+    },
+    "baseline_exact_ioc_match": {
+      "n": 454,
+      "true_clusters": 96,
+      "pred_clusters": 339,
+      "pair_precision": 1.0,
+      "pair_recall": 0.102,
+      "pair_f1": 0.1851,
+      "ari": 0.1817,
+      "bcubed_precision": 1.0,
+      "bcubed_recall": 0.311,
+      "bcubed_f1": 0.4744
+    },
+    "baseline_text_similarity_sweep": {
+      "0.5": {
+        "pair_precision": 0.2588,
+        "pair_recall": 0.7188,
+        "pair_f1": 0.3806,
+        "ari": 0.3595,
+        "bcubed_f1": 0.5714,
+        "pred_clusters": 40
+      },
+      "0.6": {
+        "pair_precision": 0.4006,
+        "pair_recall": 0.592,
+        "pair_f1": 0.4778,
+        "ari": 0.4635,
+        "bcubed_f1": 0.6072,
+        "pred_clusters": 59
+      },
+      "0.7": {
+        "pair_precision": 0.5382,
+        "pair_recall": 0.5135,
+        "pair_f1": 0.5255,
+        "ari": 0.5149,
+        "bcubed_f1": 0.6707,
+        "pred_clusters": 104
+      },
+      "0.8": {
+        "pair_precision": 0.7781,
+        "pair_recall": 0.3668,
+        "pair_f1": 0.4985,
+        "ari": 0.4912,
+        "bcubed_f1": 0.645,
+        "pred_clusters": 174
+      },
+      "0.9": {
+        "pair_precision": 1.0,
+        "pair_recall": 0.1727,
+        "pair_f1": 0.2946,
+        "ari": 0.2899,
+        "bcubed_f1": 0.521,
+        "pred_clusters": 280
+      }
+    },
+    "baseline_text_similarity_best": {
+      "threshold": 0.7,
+      "tuned_on_test_labels": true,
+      "n": 454,
+      "true_clusters": 96,
+      "pred_clusters": 104,
+      "pair_precision": 0.5382,
+      "pair_recall": 0.5135,
+      "pair_f1": 0.5255,
+      "ari": 0.5149,
+      "bcubed_precision": 0.7324,
+      "bcubed_recall": 0.6186,
+      "bcubed_f1": 0.6707
+    }
+  },
+  "throughput": {
+    "messages": 1074,
+    "analyze_msgs_per_sec_single_core": 352.1,
+    "graph_build_seconds": 0.016
+  },
+  "external_real_data": {
+    "source": "github.com/KhalidAlsantali/Arabic-SMS-Spam-Data (GPL-3.0)",
+    "n_unique": 463,
+    "dev": {
+      "n": 232,
+      "spam": 84
+    },
+    "test": {
+      "n": 231,
+      "spam": 73
+    },
+    "protocol": "lexicon tuned on DEV only; TEST untouched until frozen",
+    "test_vs_spam_label": {
+      "rasd_prior_zero_shot": {
+        "n": 231,
+        "tp": 12,
+        "fp": 0,
+        "fn": 61,
+        "tn": 158,
+        "precision": 1.0,
+        "recall": 0.1644,
+        "f1": 0.2824,
+        "fpr": 0.0,
+        "f1_ci95": [
+          0.1519,
+          0.3913
+        ]
+      },
+      "baseline_keywords": {
+        "n": 231,
+        "tp": 4,
+        "fp": 1,
+        "fn": 69,
+        "tn": 157,
+        "precision": 0.8,
+        "recall": 0.0548,
+        "f1": 0.1026,
+        "fpr": 0.0063,
+        "f1_ci95": [
+          0.0247,
+          0.2025
+        ]
+      },
+      "baseline_tfidf_lr_trained_on_dev": {
+        "n": 231,
+        "tp": 70,
+        "fp": 4,
+        "fn": 3,
+        "tn": 154,
+        "precision": 0.9459,
+        "recall": 0.9589,
+        "f1": 0.9524,
+        "fpr": 0.0253,
+        "f1_ci95": [
+          0.9128,
+          0.9844
+        ]
+      }
+    },
+    "dev_vs_spam_label_rasd": {
+      "n": 232,
+      "tp": 17,
+      "fp": 0,
+      "fn": 67,
+      "tn": 148,
+      "precision": 1.0,
+      "recall": 0.2024,
+      "f1": 0.3366,
+      "fpr": 0.0
+    },
+    "test_fraud_annotation": {
+      "annotation": "single annotator, post-freeze, blind to verdicts — see data/annotations/",
+      "rasd": {
+        "fraud_clear_recall": {
+          "n": 15,
+          "flagged": 12,
+          "rate": 0.8
+        },
+        "fraud_probable_recall": {
+          "n": 5,
+          "flagged": 0,
+          "rate": 0.0
+        },
+        "marketing_flag_rate": {
+          "n": 52,
+          "flagged": 0,
+          "rate": 0.0
+        },
+        "ham_flag_rate": {
+          "n": 158,
+          "flagged": 0,
+          "rate": 0.0
+        },
+        "malicious_verdict_on_fraud_clear": 5
+      },
+      "baseline_keywords": {
+        "fraud_clear_recall": {
+          "n": 15,
+          "flagged": 4,
+          "rate": 0.2667
+        },
+        "fraud_probable_recall": {
+          "n": 5,
+          "flagged": 0,
+          "rate": 0.0
+        },
+        "marketing_flag_rate": {
+          "n": 52,
+          "flagged": 0,
+          "rate": 0.0
+        },
+        "ham_flag_rate": {
+          "n": 158,
+          "flagged": 1,
+          "rate": 0.0063
+        }
+      },
+      "baseline_tfidf_lr_spam_classifier": {
+        "fraud_clear_recall": {
+          "n": 15,
+          "flagged": 14,
+          "rate": 0.9333
+        },
+        "fraud_probable_recall": {
+          "n": 5,
+          "flagged": 4,
+          "rate": 0.8
+        },
+        "marketing_flag_rate": {
+          "n": 52,
+          "flagged": 51,
+          "rate": 0.9808
+        },
+        "ham_flag_rate": {
+          "n": 158,
+          "flagged": 4,
+          "rate": 0.0253
+        },
+        "note": "trained to detect spam, so flagging marketing is its intended behaviour; shown to make the task difference explicit"
+      },
+      "rasd_missed_fraud_ids": [
+        "ext-135",
+        "ext-138",
+        "ext-139",
+        "ext-141",
+        "ext-146",
+        "ext-147",
+        "ext-15",
+        "ext-19"
+      ]
+    },
+    "variety_by_label_all": {
+      "ham|msa": 252,
+      "spam|msa": 146,
+      "ham|gulf": 42,
+      "spam|gulf": 6,
+      "ham|egyptian": 5,
+      "spam|levantine": 4,
+      "ham|levantine": 4,
+      "spam|en": 1,
+      "ham|maghrebi": 1,
+      "ham|en": 1,
+      "ham|mixed:gulf": 1
+    },
+    "obfuscation_evidence_in_spam_all": {
+      "obfuscation.lookalike_letters": 19,
+      "obfuscation.invisible_chars": 2
+    },
+    "campaign_structure_no_ground_truth": {
+      "campaigns": 0,
+      "messages_in_campaigns": 0,
+      "campaigns_containing_ham": 0,
+      "template_families": [
+        {
+          "size": 6,
+          "distinct_hard_indicators": 9,
+          "in_campaigns": 0,
+          "unlinked_messages": 6
+        },
+        {
+          "size": 3,
+          "distinct_hard_indicators": 4,
+          "in_campaigns": 0,
+          "unlinked_messages": 3
+        }
+      ],
+      "detail": []
+    }
+  }
+}
