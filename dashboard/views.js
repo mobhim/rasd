@@ -9,6 +9,7 @@ class Stale extends Error {}
 const api = (...args) => { const tok = NAV; return window.RASD.api(...args).then(r => { if (tok !== NAV) throw new Stale(); return r; }); };
 
 const PAGES = [
+  ["demo", "العرض الموجَّه", "تتبّع رسالة واحدة من النص الخام حتى حملتها وسجلاتها"],
   ["overview", "نظرة عامة", "ملخص تنفيذي لكل ما رصده النظام"],
   ["campaigns", "الحملات", "رسائل يربطها مورد يتحكم به المهاجم — لا تشابه النص"],
   ["messages", "تحقيق الرسائل", "كل رسالة: حكمها، أدلتها، مؤشراتها، وحملتها"],
@@ -16,6 +17,7 @@ const PAGES = [
   ["database", "قاعدة البيانات", "الجداول الفعلية وعلاقاتها وسلامتها — للقراءة فقط"],
   ["system", "مراقبة النظام", "حالة المحرك وقاعدة البيانات والواجهة البرمجية — مقاسة لا محاكاة"],
   ["analyze", "فحص رسالة", "حلّل نصًا دون تخزينه"],
+  ["search", "نتائج البحث", "بحث شامل في الحملات والمؤشرات والجهات والرسائل"],
 ];
 const main = () => $("#content");
 const loading = () => { main().innerHTML = '<div class="loading">جارٍ التحميل</div>'; };
@@ -72,19 +74,25 @@ async function overview() {
       <div class="tbl-wrap"><table class="t"><tbody>${o.top_campaigns.map(x => `<tr data-go="${link("campaigns", x.id)}"><td class="mono">${esc(x.id)}</td><td>${pill(x.confidence, T.conf)}</td><td class="num">${x.size}</td><td>${Object.keys(x.brands).slice(0, 2).map(b => `<span class="chip">${esc(b)}</span>`).join("")}</td></tr>`).join("") || '<tr><td class="empty">لا حملات</td></tr>'}</tbody></table></div></div>
   </div>
   <div class="grid g2">
+    <div class="card"><div class="card-h"><h2>توزيع درجات الخطر</h2><span class="sub">عدد الرسائل في كل شريحة درجة، ملوّنة بالحكم النهائي. الحواجز قد تُبقي رسالة عالية الدرجة «مشبوهة».</span></div><div id="ov-hist"></div></div>
+    <div class="card"><div class="card-h"><h2>التحقيقات الأخيرة</h2><a class="grow"></a><a href="${link("intel", "", {tab: "investigations"})}" class="note">الكل ←</a></div>
+      ${(o.recent_investigations || []).length ? `<table class="t"><tbody>${o.recent_investigations.map(i => `<tr data-go="${link("campaigns", i.campaign_id)}"><td>${esc(i.title)}</td><td>${pill(i.status, T.status)}</td><td class="mono">${esc(i.campaign_id)}</td><td class="mono">${dt(i.updated_at)}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">لا تحقيقات بعد${STATIC ? "" : " — افتح تحقيقًا من صفحة أي حملة"}</div>`}</div>
+  </div>
+  <div class="grid g2">
     <div class="card"><div class="card-h"><h2>أحدث الاكتشافات</h2><a class="grow"></a><a href="${link("messages", "", {verdict: "malicious"})}" class="note">الكل ←</a></div>
       <div class="tbl-wrap"><table class="t"><tbody>${o.recent_detections.map(m => `<tr data-go="${link("messages", m.id)}"><td class="mono nowrap">${day(m.received_at)}</td><td>${pill(m.verdict)}</td><td class="txt">${esc(m.text)}</td><td class="mono">${m.campaign_id ? esc(m.campaign_id) : '<span class="faint">—</span>'}</td></tr>`).join("") || '<tr><td class="empty">لا اكتشافات</td></tr>'}</tbody></table></div></div>
     <div class="card"><div class="card-h"><h2>آخر العمليات</h2><a class="grow"></a><a href="${link("system")}" class="note">المراقبة ←</a></div>
       ${o.recent_activity.length ? `<div class="tbl-wrap"><table class="t"><tbody>${o.recent_activity.map(a => `<tr><td class="mono">${dt(a.ts)}</td><td class="mono">${esc(a.op)}</td><td>${pill(a.status, T.status)}</td><td class="num">${a.items ?? ""}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">لم تُسجَّل عمليات بعد${STATIC ? " (لقطة ثابتة)" : ""}</div>`}</div>
   </div>`;
   dailyBars($("#ov-daily"), o.by_day, d => go(link("messages", "", {day: d})));
+  scoreHist($("#ov-hist"), o.score_hist || []);
   donut($("#ov-donut"), [{l: "احتيالية", v: v.malicious || 0, c: "var(--crit)", k: "malicious"}, {l: "مشبوهة", v: v.suspicious || 0, c: "var(--warn)", k: "suspicious"}, {l: "سليمة", v: v.benign || 0, c: "var(--good)", k: "benign"}], {l: "إجمالي الرسائل"}, p => go(link("messages", "", {verdict: p.k})));
   bindRows(main());
 }
 
 /* ---------------- 2. campaigns ---------------- */
 async function campaigns(arg, p) {
-  if (arg) return campaignDetail(arg);
+  if (arg) return campaignDetail(arg, p);
   const tab = p.tab || "list";
   const d = await api("/v1/campaigns");
   const rows = d.campaigns.filter(c => (!p.confidence || c.confidence === p.confidence) && (!p.q || c.id.includes(p.q) || Object.keys(c.brands).some(b => b.includes(p.q))));
@@ -98,7 +106,7 @@ async function campaigns(arg, p) {
     body.innerHTML = '<div class="loading">جارٍ بناء الرسم</div>';
     const g = await api("/v1/graph");
     body.innerHTML = `<p class="note" style="margin-top:0">كل حملة مع الموارد التي تتشاركها رسائلها والجهات التي تنتحلها. الخطوط البرتقالية المتقطعة تربط حملات نصّها متشابه وبنيتها مختلفة — تُعرض ولا تُدمج.</p><div id="g"></div>`;
-    evidenceGraph($("#g"), g, nodePanel);
+    evidenceGraph($("#g"), g, nodePanel, {enrich: graphEnrich});
     return;
   }
   body.innerHTML = `<div class="toolbar" style="margin-bottom:12px">
@@ -113,7 +121,7 @@ async function campaigns(arg, p) {
   bindRows(body);
 }
 
-async function campaignDetail(id) {
+async function campaignDetail(id, p = {}) {
   const [d, g] = await Promise.all([api("/v1/campaigns/" + encodeURIComponent(id)), api("/v1/graph" + qs({campaign_id: id}))]);
   const c = d.campaign;
   const opts = c.message_ids.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
@@ -141,11 +149,13 @@ async function campaignDetail(id) {
   </div>
   <div class="card"><div class="card-h"><h2>رسائل الحملة (${c.size})</h2></div><div class="tbl-wrap"><table class="t"><thead><tr><th>التاريخ</th><th>الحكم</th><th>الدرجة</th><th>اللهجة</th><th>المصدر</th><th>النص (منقّح)</th></tr></thead><tbody>
     ${d.messages.map(m => `<tr data-go="${link("messages", m.id)}"><td class="mono">${day(m.received_at)}</td><td>${pill(m.verdict)}</td><td class="num">${pct(m.score)}</td><td>${esc(varName(m.variety))}</td><td>${srcChip(m.source)}</td><td class="txt">${esc(m.text)}</td></tr>`).join("")}</tbody></table></div></div>`;
-  evidenceGraph($("#g"), g, nodePanel);
+  const G = evidenceGraph($("#g"), g, nodePanel, {enrich: graphEnrich});
+  if (p.focus && G.focus(p.focus)) { $("#g").scrollIntoView({block: "center"}); $("#g .graph-shell").classList.add("pulse"); }
   if ($("#lb").options.length > 1) $("#lb").selectedIndex = $("#lb").options.length - 1;
   $("#why").onclick = async () => {
     const r = await api("/v1/links/explain" + qs({a: $("#la").value, b: $("#lb").value}));
-    $("#whyout").innerHTML = r.linked ? `<ol class="steps">${r.path.map(h => `<li><span class="mono">${esc(h.from)}</span> ← <span class="chip ltr">${esc(h.via)}</span> ← <span class="mono">${esc(h.to)}</span><div class="note">${h.kind === "hard" ? "دليل قوي: مورد مشترك يتحكم به المهاجم" : "إشارتان ضعيفتان مستقلتان معًا"} · قوة ${h.strength}</div></li>`).join("")}</ol><div class="note">قوة السلسلة = أضعف حلقة فيها: <span class="num">${r.chain_strength}</span></div>`
+    if (r.linked) G.highlight([...new Set(r.path.flatMap(h => ["msg:" + h.from, "msg:" + h.to, ...(h.kind === "hard" ? ["ind:" + h.via] : [])]))]);
+    $("#whyout").innerHTML = r.linked ? `<div class="note" style="margin-bottom:6px">السلسلة مظلّلة في رسم الأدلة أعلاه.</div><ol class="steps">${r.path.map(h => `<li><span class="mono">${esc(h.from)}</span> ← <span class="chip ltr">${esc(h.via)}</span> ← <span class="mono">${esc(h.to)}</span><div class="note">${h.kind === "hard" ? "دليل قوي: مورد مشترك يتحكم به المهاجم" : "إشارتان ضعيفتان مستقلتان معًا"} · قوة ${h.strength}</div></li>`).join("")}</ol><div class="note">قوة السلسلة = أضعف حلقة فيها: <span class="num">${r.chain_strength}</span></div>`
       : `<div class="callout">${$("#la").value === $("#lb").value ? "اختر رسالتين مختلفتين." : "لا توجد سلسلة أدلة كافية تربط الرسالتين."}</div>`;
   };
   $("#stix").onclick = async () => { const b = await api(`/v1/campaigns/${encodeURIComponent(id)}/stix`); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], {type: "application/json"})); a.download = id + ".stix.json"; a.click(); };
@@ -340,6 +350,7 @@ async function database(arg, p) {
       <div class="grid g2" style="margin-top:18px"><div><h3 class="note">الجداول</h3><table class="t"><thead><tr><th>الجدول</th><th>السجلات</th><th>الأعمدة</th><th>آخر كتابة</th></tr></thead><tbody>
       ${o.tables.map(t => `<tr data-go="${link("database", "", {tab: "records", table: t.name})}"><td class="mono">${esc(t.name)}</td><td class="num">${fmt(t.rows)}</td><td class="num">${t.columns}</td><td class="mono">${dt(t.last_write)}</td></tr>`).join("")}</tbody></table></div>
       <div><h3 class="note">عروض مشتقة (تُحسب ولا تُخزَّن)</h3>${o.derived_views.map(v => `<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="mono">${esc(v.name)}</span> ← <span class="mono note">${v.computed_from.map(esc).join(" + ")}</span><div class="note">${esc(v.note_ar || v.note)}</div><div class="note mono">${esc(v.by)}</div></div>`).join("")}
+      <h3 class="note" style="margin-top:14px">تصنيف مصدر البيانات (messages.source)</h3>${hbars(Object.entries(o.messages_by_source || {}).map(([k, n]) => ({l: T.source[k] || k, v: n, c: k === "real" ? "var(--good)" : k === "synthetic" ? "var(--warn)" : "#9085e9", go: link("database", "", {tab: "records", table: "messages", f_source: k})})))}
       <div class="callout info" style="margin-top:12px">ملف القاعدة: <span class="mono">${esc(o.file)}</span>${o.persistent ? "" : " — غير محفوظ على القرص"}. هذا المستكشف للقراءة فقط: لا يتيح أي تعديل.</div></div></div>`;
     bindRows(body);
     return;
@@ -362,6 +373,7 @@ async function database(arg, p) {
       <input class="in" id="rq" placeholder="بحث نصي" value="${esc(p.q || "")}" style="flex:1;min-width:160px" aria-label="بحث">
       ${filterable.map(c => `<input class="in" data-f="${c}" placeholder="${c} =" value="${esc(p["f_" + c] || "")}" style="width:120px" aria-label="${c}">`).join("")}
       <button class="btn pri" id="rgo">تطبيق</button></div>
+    ${Object.keys(filters).length ? `<div class="toolbar" style="margin-bottom:8px"><span class="note">مرشحات نشطة:</span>${Object.entries(filters).map(([k, v]) => `<span class="chip mono">${esc(k.slice(2))} = ${esc(v)}</span>`).join("")}<a class="note" href="${link("database", "", {tab: "records", table})}">إزالة الكل</a></div>` : ""}
     <div class="note" style="margin-bottom:8px">جدول <span class="mono">${esc(table)}</span> · ${fmt(d.total)} سجل مطابق · مرتبة حسب ${table === "messages" ? "received_at" : table === "indicators" ? "rowid" : "الأحدث"} تنازليًا. انقر سجلًا لعرض تفاصيله ومصدره.</div>
     <div class="tbl-wrap"><table class="t"><thead><tr>${cols.map(c => `<th class="mono">${esc(c)}</th>`).join("")}</tr></thead><tbody>
     ${d.rows.map(r => `<tr data-rid="${r._rowid}">${cols.map(c => `<td class="${["text_redacted", "detail", "notes", "title"].includes(c) ? "txt" : "mono"}">${c === "verdict" ? pill(r[c]) : esc(r[c] == null ? "NULL" : String(r[c]).slice(0, 140))}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="${cols.length}" class="empty">لا سجلات</td></tr>`}</tbody></table></div>
@@ -481,6 +493,67 @@ function analyze() {
   };
 }
 
+/* ---------------- graph enrichment: the evidence behind a node ---------------- */
+function markText(text, needles) {
+  let parts = [esc(text)];
+  for (const n of needles.filter(Boolean).map(esc)) parts = parts.map(p => p.split(n).join(`<mark class="ind">${n}</mark>`));
+  return parts.join("");
+}
+async function graphEnrich(n, slot, focus) {
+  try {
+    if (n.kind === "message") {
+      const m = await window.RASD.api("/v1/messages/" + encodeURIComponent(n.label));
+      const a = m.analysis, top = m.explanation.reasons.filter(r => r.weight > 0).slice(0, 3);
+      slot.innerHTML = `<div class="note">نص الرسالة (منقّح) — المؤشرات مظلّلة:</div><div class="src-snip" dir="auto">${highlight(m.text, [], a.indicators)}</div>
+        <div class="note">أقوى الأدلة:</div>${top.map(r => `<div class="note">+${r.weight.toFixed(2)} ${esc(r.text)}</div>`).join("")}`;
+    } else if (n.kind === "indicator") {
+      const [type, ...rest] = n.key.split(":"); const value = rest.join(":");
+      const d = await window.RASD.api("/v1/indicators/detail" + qs({type, value}));
+      slot.innerHTML = `<div class="note">يظهر حرفيًا في ${d.messages.length} رسالة — هذا هو الدليل المباشر:</div>${d.messages.slice(0, 4).map(m => `<div class="src-snip" dir="auto"><button class="linkbtn mono" data-focus="msg:${esc(m.id)}">${esc(m.id)}</button> ${pill(m.verdict)}<br>${markText(m.text, [value, value.replace(/^\+966/, "0")])}</div>`).join("")}${d.messages.length > 4 ? `<a class="note" href="${link("intel", "", {type, value})}">و${d.messages.length - 4} رسائل أخرى ←</a>` : ""}`;
+      $$("[data-focus]", slot).forEach(b => b.onclick = () => { if (!focus(b.dataset.focus)) go(link("messages", b.dataset.focus.slice(4))); });
+    }
+  } catch (e) { slot.innerHTML = `<div class="note">${esc(e.message)}</div>`; }
+}
+
+/* ---------------- risk score histogram (one axis, stacked by verdict, hover per bin) ---------------- */
+function scoreHist(el, rows) {
+  const bins = [...Array(10)].map((_, i) => ({i, m: 0, s: 0, b: 0}));
+  rows.forEach(r => { const k = r.verdict === "malicious" ? "m" : r.verdict === "suspicious" ? "s" : "b"; bins[r.bin][k] += r.n; });
+  const max = Math.max(1, ...bins.map(b => b.m + b.s + b.b));
+  const W = 520, H = 170, L = 30, B = 22, ih = H - B - 8, bw = (W - L) / 10;
+  let g = "";
+  bins.forEach(b => {
+    let y = 8 + ih; const x = L + b.i * bw + 2, w = bw - 4;
+    for (const [k, c] of [["b", "var(--good)"], ["s", "var(--warn)"], ["m", "var(--crit)"]]) { if (!b[k]) continue; const h = b[k] / max * ih; y -= h; g += `<rect x="${x}" y="${y}" width="${w}" height="${Math.max(0, h - 2)}" rx="3" fill="${c}"/>`; }
+    g += `<rect class="hit" data-i="${b.i}" x="${L + b.i * bw}" y="8" width="${bw}" height="${ih}" fill="transparent"/><text class="ax" x="${x + w / 2}" y="${H - 6}" text-anchor="middle">${(b.i / 10).toFixed(1)}</text>`;
+  });
+  el.innerHTML = `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="توزيع درجات الخطر"><text class="ax" x="${L - 6}" y="14" text-anchor="end">${max}</text><line x1="${L}" x2="${W}" y1="${8 + ih}" y2="${8 + ih}" stroke="var(--line-2)"/>${g}</svg></div>
+    <div class="legend"><span><i class="tdot" style="background:var(--crit)"></i>احتيالية</span><span><i class="tdot" style="background:var(--warn)"></i>مشبوهة</span><span><i class="tdot" style="background:var(--good)"></i>سليمة</span><span class="mute">المحور الأفقي: درجة الخطر</span></div>`;
+  const wrap = $(".chart", el), tip = window.RASD.tipFor ? window.RASD.tipFor(wrap) : null;
+  $$(".hit", el).forEach(h => {
+    const b = bins[+h.dataset.i];
+    h.addEventListener("mousemove", e => { const box = wrap.getBoundingClientRect(); if (tip) tip.show(`<div class="mono">${(b.i / 10).toFixed(1)}–${((b.i + 1) / 10).toFixed(1)}</div><div>احتيالية <b>${b.m}</b> · مشبوهة <b>${b.s}</b> · سليمة <b>${b.b}</b></div>`, e.clientX - box.left, e.clientY - box.top); });
+    h.addEventListener("mouseleave", () => tip && tip.hide());
+  });
+}
+
+/* ---------------- unified search ---------------- */
+async function search(arg, p) {
+  const q = (p.q || "").trim();
+  $("#gsearch").q.value = q;
+  if (q.length < 2) { main().innerHTML = '<div class="card empty">اكتب حرفين على الأقل في مربع البحث أعلاه.</div>'; return; }
+  const r = await api("/v1/search" + qs({q}));
+  const sec = (title, n, body) => `<div class="card"><div class="card-h"><h2>${title} <span class="num mute">${n}</span></h2></div>${n ? body : '<div class="note">لا نتائج</div>'}</div>`;
+  main().innerHTML = `<div class="note">نتائج البحث عن «<b style="color:var(--ink)">${esc(q)}</b>»</div>
+  <div class="grid g2">
+    ${sec("الحملات", r.campaigns.length, `<table class="t"><tbody>${r.campaigns.map(c => `<tr data-go="${link("campaigns", c.id)}"><td class="mono">${esc(c.id)}</td><td>${pill(c.confidence, T.conf)}</td><td class="num">${c.size}</td><td>${c.brands.slice(0, 3).map(b => `<span class="chip">${esc(b)}</span>`).join("")}</td></tr>`).join("")}</tbody></table>`)}
+    ${sec("المؤشرات", r.indicators.length, `<div class="tbl-wrap"><table class="t"><tbody>${r.indicators.map(i => `<tr data-go="${link("intel", "", {type: i.type, value: i.value})}"><td>${tchip(i.type)}</td><td class="ltr">${esc(i.value)}</td><td class="num">${i.messages}</td><td>${i.campaign_ids.map(c => `<span class="chip mono">${esc(c)}</span>`).join("")}</td></tr>`).join("")}</tbody></table></div>`)}
+  </div>
+  ${sec("الجهات المنتحلة", r.entities.length, r.entities.map(e => `<a class="chip" href="${link("intel", "", {tab: "entities"})}">${esc(e)}</a>`).join(""))}
+  ${sec("الرسائل", r.total_messages, `<div class="tbl-wrap"><table class="t"><tbody>${r.messages.map(m => `<tr data-go="${link("messages", m.id)}"><td class="mono">${esc(m.id)}</td><td>${pill(m.verdict)}</td><td class="mono">${m.campaign_id ? esc(m.campaign_id) : "—"}</td><td class="txt">${esc(m.text)}</td></tr>`).join("")}</tbody></table></div>${r.total_messages > r.messages.length ? `<a class="note" href="${link("messages", "", {q})}">كل ${r.total_messages} رسالة ←</a>` : ""}`)}`;
+  bindRows(main());
+}
+
 /* ---------------- login & router ---------------- */
 function login(msg) {
   $("#page-title").textContent = "تسجيل الدخول"; $("#page-sub").textContent = "";
@@ -490,7 +563,8 @@ function login(msg) {
   $("#lf").onsubmit = e => { e.preventDefault(); setKey(e.target.k.value.trim()); route(); };
 }
 
-const VIEWS = {overview, campaigns, messages, intel, database, system, analyze};
+const VIEWS = {overview, campaigns, messages, intel, database, system, analyze, search,
+  demo: (arg, p) => window.RASD_DEMO(arg, p, {main, api})};
 async function route() {
   closeDrawer();
   NAV++;
@@ -507,7 +581,12 @@ async function route() {
 const KEYED = () => { try { return !!sessionStorage.getItem("rasd_key"); } catch { return false; } };
 
 function shell() {
-  $("#nav").innerHTML = PAGES.map(([k, l], i) => `${i === 5 ? '<div class="sep"></div>' : ""}<a href="#${k}" data-p="${k}">${icon(k)}<span>${l}</span></a>`).join("");
+  $("#nav").innerHTML = PAGES.filter(([k]) => k !== "search").map(([k, l], i) => `${i === 1 || i === 7 ? '<div class="sep"></div>' : ""}<a href="#${k}" data-p="${k}">${icon(k)}<span>${l}</span></a>`).join("");
+  $("#mode").innerHTML = STATIC ? '<i></i>عرض ثابت · المحرك في المتصفح' : '<i></i>وضع حي · متصل بالخادم';
+  $("#mode").className = "mode " + (STATIC ? "static" : "live");
+  $("#mode").title = STATIC ? "لا خادم ولا قاعدة بيانات حية: لقطة من استجابات الواجهة البرمجية الحقيقية على بيانات اصطناعية، مع محرك رصد يعمل في متصفحك" : "كل البيانات من خادم رصد وقاعدة بياناته عبر الواجهة البرمجية";
+  $("#site-link").hidden = !STATIC;
+  $("#gsearch").onsubmit = e => { e.preventDefault(); const q = e.target.q.value.trim(); if (q.length >= 2) go(link("search", "", {q})); };
   $("#drawer-close").onclick = closeDrawer; $("#drawer-bg").onclick = closeDrawer;
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
   $("#menu").onclick = () => $("#side").classList.toggle("open");

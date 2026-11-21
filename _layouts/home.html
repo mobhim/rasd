@@ -1,41 +1,101 @@
 ---
 layout: default
 ---
+{% assign dash = '/dashboard/' | relative_url %}
 <section class="hero">
-  <div class="wrap">
-    <p class="eyebrow">Arabic Threat Intelligence</p>
-    <h1>نكشف <em>الحملة</em>، لا الرسالة وحدها</h1>
-    <p class="lead">رصد يقرأ رسائل الاحتيال العربية بالفصحى واللهجات، يستخرج الروابط والأرقام والآيبانات والمحافظ، ويربط ما يعود منها لعملية واحدة — ويشرح الدليل وراء كل حكم وكل ربط.</p>
-    <div class="cta">
-      <a class="btn pri" href="{{ '/dashboard/' | relative_url }}">افتح لوحة التحقيق</a>
-      <a class="btn" href="#التشغيل">التشغيل محليًا</a>
-      <a class="btn" href="{{ '/docs/04-evaluation.html' | relative_url }}">النتائج وحدودها</a>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Arabic Threat Intelligence</p>
+      <h1>نكشف <em>الحملة</em>،<br>لا الرسالة وحدها</h1>
+      <p class="lead">رصد يقرأ رسائل الاحتيال العربية بالفصحى واللهجات، ويستخرج منها الروابط والأرقام والآيبانات والمحافظ. ثم يربط الرسائل التي تعود لعملية واحدة بدليل يمكن التحقق منه، ويشرح كل حكم وكل ربط.</p>
+      <div class="cta">
+        <a class="btn pri" href="{{ dash }}#demo">ابدأ العرض الموجَّه</a>
+        <a class="btn" href="{{ dash }}#campaigns?tab=graph">استكشف خريطة الحملات</a>
+      </div>
+      <p class="hero-note"><span class="dot"></span><span>العرض العام يعمل في متصفحك: محرك رصد نفسه بلغة <bdi>Python</bdi> عبر <bdi>WebAssembly</bdi>، على بيانات <b>اصطناعية</b> موسومة.</span></p>
     </div>
+    <figure class="idea" aria-labelledby="idea-cap">
+      <svg viewBox="0 0 440 330" role="img" aria-label="ثلاث رسائل بنصوص مختلفة تشترك في رقم ونطاق فتُربط في حملة، ورسالتان بنص متطابق دون مورد مشترك لا تُربطان">
+        <defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="#2ad4c4"/></marker></defs>
+        <g class="lbl"><text x="220" y="20" text-anchor="middle">نصوص مختلفة، مورد مشترك ← حملة واحدة</text></g>
+        <g class="msgs">
+          <rect x="300" y="40" width="120" height="34" rx="7"/><text x="360" y="62" text-anchor="middle">«حسابك موقوف…»</text>
+          <rect x="300" y="92" width="120" height="34" rx="7"/><text x="360" y="114" text-anchor="middle">«بطاقتك راح تتقفل…»</text>
+          <rect x="300" y="144" width="120" height="34" rx="7"/><text x="360" y="166" text-anchor="middle">«الفيزا اتقفلت…»</text>
+        </g>
+        <g class="res">
+          <rect x="150" y="64" width="96" height="28" rx="6" class="phone"/><text x="198" y="83" text-anchor="middle">+9665000…</text>
+          <rect x="150" y="128" width="96" height="28" rx="6" class="domain"/><text x="198" y="147" text-anchor="middle">bank-update.test</text>
+        </g>
+        <g class="edges"><path d="M300 57L246 78M300 109L246 82M300 109L246 140M300 161L246 144"/></g>
+        <g class="cmp"><circle cx="60" cy="112" r="34"/><circle cx="60" cy="112" r="22" class="core"/><text x="60" y="166" text-anchor="middle">حملة</text></g>
+        <path d="M150 78L98 104M150 142L98 120" class="link" marker-end="url(#arr)"/>
+        <line x1="20" y1="200" x2="420" y2="200" class="sep"/>
+        <g class="lbl"><text x="220" y="224" text-anchor="middle">نص متطابق، بنية مختلفة ← لا ربط</text></g>
+        <g class="msgs"><rect x="300" y="240" width="120" height="34" rx="7"/><text x="360" y="262" text-anchor="middle">«تم تعليق بطاقتك…»</text>
+          <rect x="20" y="240" width="120" height="34" rx="7"/><text x="80" y="262" text-anchor="middle">«تم تعليق بطاقتك…»</text></g>
+        <path d="M300 257L140 257" class="weak"/><text x="220" y="250" text-anchor="middle" class="weak-t">تشابه نصّي فقط</text>
+        <text x="220" y="300" text-anchor="middle" class="note-t">رصد يعرضهما «عائلة قالب» — فرضية، لا دليلًا</text>
+      </svg>
+      <figcaption id="idea-cap">توضيح لقاعدة الربط التي يطبّقها المحرك (الأمثلة ليست بيانات حقيقية)</figcaption>
+    </figure>
   </div>
 </section>
 
-<section class="wrap stats" aria-label="أرقام مقاسة">
-  <div class="stat"><b>12<span>/15</span></b><p>رسالة احتيال حقيقية التُقطت في نصف اختبار محجوب</p><small>بيانات حقيقية · عيّنة صغيرة</small></div>
-  <div class="stat"><b>0<span>/52</span></b><p>رسالة تسويق مشروعة أُشير إليها خطأً، مقابل 51 للمصنِّف النصي التقليدي</p><small>بيانات حقيقية</small></div>
-  <div class="stat"><b>0.96</b><p>F1 لربط الحملات، مقابل 0.53 لتجميع الرسائل بتشابه النص</p><small>بيانات اصطناعية بحقيقة معروفة</small></div>
-  <div class="stat"><b>0</b><p>رسالة سليمة دخلت حملة عبر أربع بذور تجريبية</p><small>بيانات اصطناعية</small></div>
+<section class="wrap band problem">
+  <div><b>الاحتيال يأتي في حملات</b><p>الجهة نفسها ترسل آلاف الرسائل بصيغ ولهجات مختلفة، وتبدّل أرقامها ونطاقاتها.</p></div>
+  <div><b>الحجب رسالةً برسالة لا يكفي</b><p>حجب رابط واحد يترك بقية موارد العملية تعمل. المطلوب قائمة بما يُعطَّل معًا، ومعها الدليل.</p></div>
+  <div><b>المصنِّفات النصية تخلط الأمور</b><p>نص متشابه لا يعني جهة واحدة، ونص مختلف قد يخفي الجهة نفسها. الربط الصحيح يقوم على البنية التي يتحكم بها المهاجم.</p></div>
 </section>
 
-<section class="wrap pillars">
-  <div><h3>معيار أدلة صريح</h3><p>مورد واحد يتحكم به المهاجم — نطاق، رقم تواصل، آيبان، محفظة — يكفي للربط. تشابه النص وحده لا يربط أبدًا.</p></div>
-  <div><h3>تفسير هو النموذج نفسه</h3><p>الدرجة مجموع أوزان أدلة مسمّاة، فمساهمة كل دليل دقيقة — مع ما يلزم إسقاطه ليتغيّر الحكم.</p></div>
-  <div><h3>عربي من الأساس</h3><p>فصحى وخمس لهجات، أرقام هندية، حروف فارسية شبيهة، أحرف مخفية، روابط مموّهة — وصيغ الهواتف والآيبان لكل بلد.</p></div>
-  <div><h3>خصوصية بالتصميم</h3><p>رقم الضحية لا يُخزَّن، والبطاقات والرموز تُطمس. لا جلب للروابط ولا تواصل مع بنية المهاجم.</p></div>
+<section class="wrap">
+  <h2 class="sec-h">كيف يعمل المحرك</h2>
+  <ol class="pipeline">
+    <li><a href="{{ dash }}#demo"><span>1</span><b>يقرأ العربية كما هي</b><p>يوحّد الإملاء والأرقام الهندية، ويكشف الأحرف المخفية والحروف الشبيهة والكلمات المفككة، ويحدّد اللهجة.</p></a></li>
+    <li><a href="{{ dash }}#demo"><span>2</span><b>يستخرج المؤشرات</b><p>روابط ونطاقات وهواتف وآيبانات (يتحقق من صحتها) ومحافظ وحسابات تليجرام وواتساب، كلٌّ في صيغة موحّدة.</p></a></li>
+    <li><a href="{{ dash }}#demo"><span>3</span><b>يحكم بأدلة مسمّاة</b><p>الدرجة مجموع أوزان أدلة ظاهرة. والأسلوب وحده لا يكفي للإدانة دون رابط أو رقم أو طلب بيانات سرية.</p></a></li>
+    <li><a href="{{ dash }}#campaigns?tab=graph"><span>4</span><b>يربط بالدليل</b><p>يربط الرسائل عبر مورد يتحكم به المهاجم. الإشارات الضعيفة لا تربط وحدها، والمنصات العامة لا تربط أبدًا.</p></a></li>
+    <li><a href="{{ dash }}#messages"><span>5</span><b>يشرح كل شيء</b><p>يبيّن مساهمة كل دليل، وما الذي لو سقط لتغيّر الحكم، وسلسلة الأدلة بين أي رسالتين.</p></a></li>
+  </ol>
+</section>
+
+<section class="wrap standard">
+  <div>
+    <h2 class="sec-h">معيار الأدلة</h2>
+    <p class="muted">الربط ادّعاء استخباراتي، لذلك له قواعد معلنة يمكن التحقق منها في كل حملة:</p>
+    <table>
+      <tr><th><span class="tag hard">قوي</span></th><td>نطاق مسجّل، رقم تواصل في المتن، آيبان، محفظة، حساب، بريد</td><td>دليل واحد يكفي للربط</td></tr>
+      <tr><th><span class="tag weak">ضعيف</span></th><td>رقم المرسل، اسم المرسل، قالب النص، مسار الرابط</td><td>لا يربط وحده؛ إشارتان مستقلتان معًا ← ربط بثقة منخفضة</td></tr>
+      <tr><th><span class="tag none">لا يربط</span></th><td>المختصرات والمنصات العامة والنطاقات الرسمية</td><td>مستبعدة من الاستخراج</td></tr>
+    </table>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>0.96</b><p>F1 لربط الحملات، مقابل 0.53 لتجميع الرسائل بتشابه النص</p><small>بيانات اصطناعية بحقيقة معروفة</small></div>
+    <div class="stat"><b>0.22</b><p>دقة الربط إذا سُمح لتشابه النص وحده بالدمج، مقابل 0.99 بمعيار الأدلة</p><small>تجربة استئصال، بيانات اصطناعية</small></div>
+    <div class="stat"><b>12<span>/15</span></b><p>رسالة احتيال حقيقية التُقطت في نصف اختبار محجوب، مع 0 من 52 رسالة تسويق</p><small>بيانات حقيقية · عيّنة صغيرة</small></div>
+    <a class="stat link" href="{{ '/docs/04-evaluation.html' | relative_url }}"><b>←</b><p>المنهجية والنتائج كاملة، وما لم يثبت بعد</p><small>التقييم</small></a>
+  </div>
 </section>
 
 <section class="wrap shots">
-  <h2>لوحة التحقيق</h2>
-  <p class="note">النسخة المنشورة هنا <b>لقطة ثابتة للقراءة</b>: كل ملف فيها استجابة حقيقية من واجهة رصد البرمجية ومحركه، على بيانات <b>اصطناعية</b> (نطاقات ‎.example/.test‎ لا تُحَلّ). فحص الرسائل وفتح التحقيقات والمراقبة الحية تتطلب تشغيل الخادم.</p>
+  <h2 class="sec-h">منصة التحقيق</h2>
+  <p class="muted">النسخة المنشورة هنا <b>عرض ثابت</b>: كل بياناتها استجابات حقيقية من واجهة رصد البرمجية على بيانات <b>اصطناعية</b> (نطاقات ‎.example/.test‎ لا تُحَلّ)، ومحرك التحليل يعمل في متصفحك. فتح التحقيقات والمراقبة الحية يتطلبان تشغيل الخادم.</p>
   <div class="gallery">
-    <figure><a href="{{ '/dashboard/#campaigns?tab=graph' | relative_url }}"><img src="{{ '/docs/img/campaign-map.png' | relative_url }}" alt="خريطة الحملات: كل حملة ومواردها، والحملات المتشابهة نصًا غير مدموجة" loading="lazy"></a><figcaption>خريطة الحملات — الدليل المباشر مقابل العلاقة المستنتجة</figcaption></figure>
-    <figure><a href="{{ '/dashboard/#messages' | relative_url }}"><img src="{{ '/docs/img/message.png' | relative_url }}" alt="مساحة تحقيق رسالة: مساهمة كل دليل في الدرجة" loading="lazy"></a><figcaption>تحقيق رسالة: لماذا هذا الحكم؟</figcaption></figure>
-    <figure><a href="{{ '/dashboard/#database?tab=schema' | relative_url }}"><img src="{{ '/docs/img/database.png' | relative_url }}" alt="مركز قاعدة البيانات: المخطط الفعلي والعلاقات" loading="lazy"></a><figcaption>قاعدة البيانات الفعلية وعلاقاتها</figcaption></figure>
+    <figure><a href="{{ dash }}#campaigns?tab=graph"><img src="{{ '/docs/img/campaign-map.png' | relative_url }}" alt="خريطة الحملات" loading="lazy"></a><figcaption>خريطة الحملات: الدليل المباشر مقابل العلاقة المستنتجة</figcaption></figure>
+    <figure><a href="{{ dash }}#demo"><img src="{{ '/docs/img/demo.png' | relative_url }}" alt="العرض الموجَّه" loading="lazy"></a><figcaption>العرض الموجَّه: من النص الخام إلى الحملة</figcaption></figure>
+    <figure><a href="{{ dash }}#database?tab=schema"><img src="{{ '/docs/img/database.png' | relative_url }}" alt="قاعدة البيانات" loading="lazy"></a><figcaption>قاعدة البيانات الفعلية وعلاقاتها</figcaption></figure>
   </div>
+  <div class="cta center"><a class="btn pri" href="{{ dash }}#demo">جرّبه الآن</a></div>
 </section>
 
-<main class="wrap doc"><article class="prose readme">{{ content }}</article></main>
+<section class="wrap docs-grid">
+  <h2 class="sec-h">للتعمق</h2>
+  <div class="cards">
+    <a href="{{ '/docs/01-research-gap.html' | relative_url }}"><b>البحث والفجوة</b><span>ما الموجود، وما لم يُعالَج بعد</span></a>
+    <a href="{{ '/docs/03-architecture.html' | relative_url }}"><b>المعمارية</b><span>مسار البيانات، معيار الأدلة، الواجهة البرمجية، قاعدة البيانات</span></a>
+    <a href="{{ '/docs/04-evaluation.html' | relative_url }}"><b>التقييم</b><span>المنهجية، النتائج، الحدود</span></a>
+    <a href="{{ '/docs/05-security-privacy.html' | relative_url }}"><b>الأمن والخصوصية</b><span>التنقيح، التجهيل، نموذج التهديد</span></a>
+    <a href="{{ '/docs/06-business-model.html' | relative_url }}"><b>النموذج التجاري</b><span>العملاء والتوسّع</span></a>
+    <a href="https://github.com/mobhim/rasd"><b>الكود المصدري</b><span>التشغيل محليًا: <code>pip install -e ".[api]"</code> ثم <code>rasd serve</code></span></a>
+  </div>
+</section>

@@ -139,3 +139,29 @@ def test_v1_database_is_migrated_in_place(tmp_path):
     con.commit(); con.close()
     s = Store(str(p))
     assert s.list("t")[0]["source"] == "unspecified" and s.db_overview("t")["schema_version"] == "2"
+
+
+def test_analyze_returns_engine_trace_and_correlation(client):
+    r = client.post("/v1/analyze", headers=H, json={"text": "ع ا ج ل حسا​بك موقوف، حدث بياناتك alrajhi-a1.example/login بطاقة 4111111111111111 او ٠٥٠٠٠٠٧٧٧٧"}).json()
+    st = {s["id"]: s for s in r["trace"]["stages"]}
+    assert list(st) == ["original", "clean", "fold", "redact"]
+    assert "​" not in st["clean"]["text"] and "0500007777" in st["clean"]["text"]
+    assert "عاجل" in st["fold"]["text"] and "4111111111111111" not in st["redact"]["text"]
+    co = r["correlation"]
+    assert co["would_join_campaigns"] and "domain:alrajhi-a1.example" in {i["key"] for i in co["indicators"] if i["seen_in_messages"]}
+    # nothing was stored by analysing
+    assert client.get("/v1/messages", headers=H).json()["total"] == 5
+
+
+def test_text_similarity_alone_never_correlates(client):
+    same_text_new_infra = PHISH.format("brand-new.invalid")
+    co = client.post("/v1/analyze", headers=H, json={"text": same_text_new_infra}).json()["correlation"]
+    assert co["would_join_campaigns"] == []
+
+
+def test_demo_samples_and_unified_search(client):
+    s = client.get("/v1/demo/samples", headers=H).json()["samples"]
+    assert s and all(x["text"] and x["role"] in ("campaign", "uncertain", "hard_negative") for x in s)
+    r = client.get("/v1/search", headers=H, params={"q": "alrajhi-a1"}).json()
+    assert r["indicators"] and r["campaigns"] and r["total_messages"] == 2
+    assert client.get("/v1/search", headers=H, params={"q": "x"}).status_code == 422

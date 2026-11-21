@@ -58,7 +58,7 @@ def explain(analysis: dict, lang: str = "ar", thresholds: tuple[float, float] = 
     return {
         "summary": summary, "verdict": analysis["verdict"], "score": analysis["score"],
         "model": {"type": "additive log-odds", "bias": bias, "logit": logit, "policy_version": analysis.get("policy_version"),
-                  "formula": "score = sigmoid(bias + Σ weight_i)"},
+                  "formula": "score = sigmoid(bias + Σ weight_i)", "thresholds": list(thresholds)},
         "reasons": reasons,
         "guard": GUARDS.get(analysis.get("guard_applied") or "", {}).get(lang),
         "counterfactual": {"remove_to_change_verdict": cf,

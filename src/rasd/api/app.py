@@ -119,7 +119,51 @@ def create_app(rasd: Rasd | None = None, api_keys: dict[str, str] | None = None)
 
     @app.post("/v1/analyze", summary="Analyse one message without storing it")
     def analyze(m: MessageIn, lang: Lang = "ar", t: str = Depends(tenant)):
-        return with_expl(rasd.analyze(m.to_message()), lang)
+        a, tr = rasd.analyze_traced(m.to_message())
+        return {**with_expl(a, lang), "trace": tr, "correlation": rasd.correlate(t, a)}
+
+    @app.get("/v1/demo/samples", summary="Messages from the database chosen to demonstrate the engine")
+    def demo_samples(t: str = Depends(tenant)):
+        g = rasd.graph(t)
+        picks, seen_c, seen_v = [], set(), set()
+        for c in sorted(g.campaigns, key=lambda c: (-c["shared_indicator_count"], c["id"])):
+            for mid in c["message_ids"]:
+                m = rasd.store.get(t, mid)
+                if m and m["verdict"] == "malicious" and m["variety"] not in seen_v:
+                    picks.append((m, "campaign")); seen_c.add(c["id"]); seen_v.add(m["variety"])
+                    break
+            if len(picks) >= 4:
+                break
+        for verdict, role in (("suspicious", "uncertain"), ("benign", "hard_negative")):
+            for m in rasd.store.list(t, verdict, None, 200):
+                full = rasd.store.get(t, m["id"])
+                if role == "hard_negative" and not any(e["id"].startswith("benign.") for e in full["analysis"]["evidence"]):
+                    continue
+                if role == "uncertain" and m["id"] in g.msg_campaign:
+                    continue
+                picks.append((full, role))
+                break
+        return {"samples": [{"id": m["id"], "text": m["text"], "sender": next(
+                    (i["raw"] for i in m["analysis"]["indicators"] if i["role"] == "sender"), None),
+                    "role": role, "source": m["source"], "variety": m["variety"], "verdict": m["verdict"],
+                    "campaign_id": g.msg_campaign.get(m["id"])} for m, role in picks],
+                "note": "texts are the stored (redacted) records; their provenance label is kept"}
+
+    @app.get("/v1/search", summary="Unified search across campaigns, indicators, entities and messages")
+    def search(q: str = Query(min_length=2, max_length=200), t: str = Depends(tenant)):
+        g = rasd.graph(t)
+        ql = q.lower()
+        camps = [{"id": c["id"], "size": c["size"], "confidence": c["confidence"], "brands": list(c["brands"])}
+                 for c in g.campaigns if ql in c["id"] or any(ql in b for b in c["brands"])
+                 or any(ql in d["value"].lower() for d in c["indicators"])][:20]
+        inds = [{"key": r["key"], "type": r["type"], "value": r["value"], "messages": r["messages"], "campaign_ids": r["campaign_ids"]}
+                for r in _groups(t) if ql in r["value"].lower()][:30]
+        ents = sorted({b for n in g.nodes.values() for b in n.brands if ql in b})[:10]
+        msgs = rasd.store.list(t, None, q, 20)
+        for m in msgs:
+            m["campaign_id"] = g.msg_campaign.get(m["id"]); m["text"] = m["text"][:180]
+        return {"q": q, "campaigns": camps, "indicators": inds, "entities": ents, "messages": msgs,
+                "total_messages": rasd.store.count(t, None, q)}
 
     @app.post("/v1/messages", summary="Ingest messages (analysed, redacted, stored, linked)")
     def ingest(batch: BatchIn, t: str = Depends(tenant)):
@@ -393,6 +437,7 @@ def create_app(rasd: Rasd | None = None, api_keys: dict[str, str] | None = None)
             "top_campaigns": [{k: c[k] for k in ("id", "size", "confidence", "brands", "last_seen", "shared_indicator_count")} for c in top],
             "recent_detections": recent[:10],
             "recent_activity": rasd.store.ops(t, 10),
+            "recent_investigations": rasd.store.investigations(t)[:6],
         }
 
     # ------------------------------------------------------------------ database intelligence center (read-only)

@@ -11,11 +11,42 @@
   const lc = s => String(s ?? "").toLowerCase();
   const SEARCH = {messages: ["id", "text_redacted", "verdict", "variety", "source"], indicators: ["message_id", "type", "value"], investigations: ["id", "campaign_id", "title", "notes"], operations: ["op", "status", "detail"], audit: ["action", "detail"]};
 
+  /** Same evidence standard as Rasd.correlate(): only linkable, non-suppressed body indicators can link. */
+  async function correlate(a) {
+    const inds = await load("indicators.json"); const by = new Map(inds.map(i => [i.key, i]));
+    const out = a.indicators.filter(i => i.role === "body").map(i => { const s = by.get(i.key);
+      return {key: i.key, type: i.type, value: i.value, linkable: i.linkable, seen_in_messages: s ? s.messages : 0, message_ids: s ? s.message_ids.slice(0, 10) : [], campaign_ids: s ? s.campaign_ids : [], suppressed_reason: s ? s.suppressed_reason : null}; });
+    const usable = out.filter(c => c.linkable && !c.suppressed_reason);
+    return {indicators: out, would_join_campaigns: [...new Set(usable.flatMap(c => c.campaign_ids))].sort(), shares_resources_with_messages: [...new Set(usable.flatMap(c => c.message_ids))].sort().slice(0, 20),
+      standard: "only actor-controlled resources (linkable, not suppressed) can link; text similarity never does"};
+  }
+  async function analyzeStatic(body) {
+    let out;
+    try { out = await window.RASD_ENGINE.analyze(body.text, body.sender); }
+    catch (e) {
+      const s = (await load("demo/samples.json")).samples.find(x => x.text === body.text);
+      if (!s) throw new Error("محرك المتصفح غير متاح (" + (e.message || e) + ") — يمكن عرض النتائج المحسوبة مسبقًا للرسائل النموذجية فقط");
+      out = await load(`demo/${s.id}.json`); out = {...out, engine: {runtime: "precomputed", note: "computed by the RASD engine when the snapshot was generated"}};
+      return out;
+    }
+    return {...out, correlation: await correlate(out.analysis)};
+  }
+
   window.RASD_STATIC = async (path, opts = {}) => {
-    if (opts.method && opts.method !== "GET") throw new Error("هذه لقطة ثابتة للقراءة فقط — شغّل خادم رصد لإجراء التعديلات");
     const u = new URL(path, "http://x"), p = u.searchParams, seg = u.pathname.replace(/^\/v1\//, "").split("/").map(decodeURIComponent);
+    if (opts.method === "POST" && seg[0] === "analyze") return analyzeStatic(JSON.parse(opts.body || "{}"));
+    if (opts.method && opts.method !== "GET") throw new Error("هذه لقطة ثابتة للقراءة فقط — شغّل خادم رصد لإجراء التعديلات");
     switch (seg[0]) {
       case "overview": return load("overview.json");
+      case "demo": return load("demo/samples.json");
+      case "search": {
+        const q = lc(p.get("q")); const [camps, inds, msgs, ents] = await Promise.all([load("campaigns.json"), load("indicators.json"), load("messages.json"), load("entities.json")]);
+        const full = await Promise.all(camps.campaigns.map(c => load(`campaigns/${c.id}.json`)));
+        const mm = msgs.filter(m => lc(m.text).includes(q) || lc(m.id).includes(q));
+        return {q, campaigns: full.filter(d => d.campaign.id.includes(q) || Object.keys(d.campaign.brands).some(b => b.includes(q)) || d.campaign.indicators.some(i => lc(i.value).includes(q))).slice(0, 20).map(d => ({id: d.campaign.id, size: d.campaign.size, confidence: d.campaign.confidence, brands: Object.keys(d.campaign.brands)})),
+          indicators: inds.filter(i => lc(i.value).includes(q)).slice(0, 30).map(i => ({key: i.key, type: i.type, value: i.value, messages: i.messages, campaign_ids: i.campaign_ids})),
+          entities: ents.entities.map(e => e.id).filter(e => e.includes(q)).slice(0, 10), messages: mm.slice(0, 20).map(m => ({...m, text: m.text.slice(0, 180)})), total_messages: mm.length};
+      }
       case "stats": return load("overview.json");
       case "entities": return load("entities.json");
       case "template-families": return load("template-families.json");

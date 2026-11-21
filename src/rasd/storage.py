@@ -213,6 +213,8 @@ class Store:
                 "by_channel": {r[0]: r[1] for r in q("SELECT channel, COUNT(*) FROM messages WHERE tenant=? GROUP BY channel")},
                 "by_day": [{"day": r[0], "verdict": r[1], "n": r[2]} for r in q(
                     "SELECT substr(received_at,1,10), verdict, COUNT(*) FROM messages WHERE tenant=? GROUP BY 1,2 ORDER BY 1")],
+                "score_hist": [{"bin": r[0], "verdict": r[1], "n": r[2]} for r in q(
+                    "SELECT MIN(CAST(score*10 AS INTEGER), 9), verdict, COUNT(*) FROM messages WHERE tenant=? GROUP BY 1,2 ORDER BY 1")],
                 "indicators_distinct": q("SELECT COUNT(*) FROM (SELECT DISTINCT type, value FROM indicators WHERE tenant=?)")[0][0],
                 "indicators_by_type": {r[0]: r[1] for r in q(
                     "SELECT type, COUNT(DISTINCT value) FROM indicators WHERE tenant=? GROUP BY type ORDER BY 2 DESC")},
@@ -322,6 +324,8 @@ class Store:
                 "journal_mode": self._pragma("journal_mode"), "schema_version": meta.get("schema_version"),
                 "tables": tables, "derived_views": DERIVED_VIEWS,
                 "row_counts_scope": "rows belonging to your tenant",
+                "messages_by_source": {r[0]: r[1] for r in self.db.execute(
+                    "SELECT source, COUNT(*) FROM messages WHERE tenant=? GROUP BY source", (tenant,))},
             }
 
     def columns(self, table: str) -> list[dict]:

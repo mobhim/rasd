@@ -29,6 +29,8 @@ const tchip = t => `<span class="chip"><i class="tdot" style="background:var(--t
 const srcChip = s => s && s !== "unspecified" ? `<span class="chip src-${esc(s)}">${esc(T.source[s] || s)}</span>` : "";
 const ICON = {
   overview: '<path d="M3 13h7V3H3zM14 21h7V11h-7zM3 21h7v-5H3zM14 7h7V3h-7z"/>',
+  demo: '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/>',
   campaigns: '<circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/>',
   messages: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   intel: '<path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/>',
@@ -190,7 +192,7 @@ function nodeShape(n, r) {
  * click a node -> details + its relations in the side panel. Solid edge = direct evidence,
  * dashed = inferred (derived membership, corroborated weak signals, template similarity).
  */
-function evidenceGraph(host, data, onSelect) {
+function evidenceGraph(host, data, onSelect, opts = {}) {
   const N = data.nodes.map((n, i) => ({...n, x: 0, y: 0, vx: 0, vy: 0, i}));
   const ix = new Map(N.map(n => [n.id, n]));
   const E = data.edges.map(e => ({...e, s: ix.get(e.source), t: ix.get(e.target)})).filter(e => e.s && e.t);
@@ -220,7 +222,12 @@ function evidenceGraph(host, data, onSelect) {
   const showLabel = n => n.kind !== "message" && (n.kind === "campaign" || N.length < 160 || (deg.get(n.id) || 0) > 2);
   const lbl = s => s.length > 30 ? s.slice(0, 29) + "…" : s;
   host.innerHTML = `<div class="graph-shell"><div class="graph-canvas">
-    <div class="graph-tools"><button class="btn" data-z="in" title="تكبير">${icon("plus")}</button><button class="btn" data-z="out" title="تصغير">${icon("minus")}</button><button class="btn" data-z="fit" title="ملاءمة">${icon("fit")}</button></div>
+    <div class="graph-tools"><button class="btn" data-z="in" title="تكبير" aria-label="تكبير">${icon("plus")}</button><button class="btn" data-z="out" title="تصغير" aria-label="تصغير">${icon("minus")}</button><button class="btn" data-z="fit" title="ملاءمة" aria-label="ملاءمة">${icon("fit")}</button></div>
+    <div class="graph-filter" dir="rtl">
+      <input class="in" list="gl-${host.id}" placeholder="ابحث عن عقدة…" aria-label="ابحث عن عقدة"><datalist id="gl-${host.id}">${N.map(n => `<option value="${esc(n.label)}">`).join("")}</datalist>
+      ${[["message", "الرسائل"], ["indicator", "المؤشرات"], ["entity", "الجهات"], ["campaign", "الحملات"]].filter(([k]) => N.some(n => n.kind === k)).map(([k, l]) => `<label><input type="checkbox" data-kind="${k}" checked> ${l}</label>`).join("")}
+      ${E.some(e => !e.direct) ? '<label><input type="checkbox" data-inferred checked> المستنتجة</label>' : ""}
+    </div>
     <svg viewBox="${vb.join(" ")}" role="img" aria-label="رسم الأدلة">
       <g class="edges">${E.map((e, i) => `<line class="gedge" data-i="${i}" x1="${e.s.x}" y1="${e.s.y}" x2="${e.t.x}" y2="${e.t.y}" stroke="${e.kind === "same_template" ? "var(--warn)" : e.direct ? "#6f86a8" : "#9aa9be"}" stroke-opacity="${e.direct ? .55 : .5}" stroke-width="${e.kind === "uses" ? Math.min(4, 1 + (e.messages || 1) / 4) : 1.2}" ${e.direct ? "" : 'stroke-dasharray="5 4"'}/>`).join("")}</g>
       <g class="nodes">${N.map(n => { const r = n.kind === "campaign" ? Math.min(26, NODE.campaign.r + Math.sqrt(n.size || 1) * 1.6) : NODE[n.kind].r;
@@ -255,12 +262,33 @@ function evidenceGraph(host, data, onSelect) {
     $$(".gnode", svg).forEach(g => { g.classList.toggle("dim", !nb.has(g.dataset.id)); g.classList.toggle("sel", g.dataset.id === id); });
     $$(".gedge", svg).forEach(l => { const e = E[+l.dataset.i]; l.classList.toggle("dim", !(e.s.id === id || e.t.id === id)); });
     panel.innerHTML = onSelect(n, rel.map(e => ({...e, other: e.s.id === id ? e.t : e.s})));
-    $$("[data-node]", panel).forEach(b => b.onclick = () => { const m = ix.get(b.dataset.node); select(b.dataset.node); const r = vb[2]; setVb([m.x - r / 2, m.y - vb[3] / 2, vb[2], vb[3]]); });
+    $$("[data-node]", panel).forEach(b => b.onclick = () => focus(b.dataset.node));
     bindRows(panel);
+    const slot = $("[data-enrich]", panel);
+    if (slot && opts.enrich) opts.enrich(n, slot, focus);
   };
+  const center = m => setVb([m.x - vb[2] / 2, m.y - vb[3] / 2, vb[2], vb[3]]);
+  const focus = id => { const m = ix.get(id); if (!m) return false; select(id); center(m); return true; };
+  /** Highlight a set of node ids (e.g. an evidence path) and the edges between them. */
+  const highlight = ids => {
+    const s = new Set(ids);
+    $$(".gnode", svg).forEach(g => { g.classList.toggle("dim", !s.has(g.dataset.id)); g.classList.toggle("sel", s.has(g.dataset.id)); });
+    $$(".gedge", svg).forEach(l => { const e = E[+l.dataset.i]; const on = s.has(e.s.id) && s.has(e.t.id); l.classList.toggle("dim", !on); l.classList.toggle("path", on); });
+    const pts = ids.map(i => ix.get(i)).filter(Boolean);
+    if (pts.length) center({x: pts.reduce((a, p) => a + p.x, 0) / pts.length, y: pts.reduce((a, p) => a + p.y, 0) / pts.length});
+  };
+  const applyFilter = () => {
+    const kinds = new Set($$("[data-kind]", host).filter(c => c.checked).map(c => c.dataset.kind));
+    const inferred = !$("[data-inferred]", host) || $("[data-inferred]", host).checked;
+    $$(".gnode", svg).forEach(g => g.classList.toggle("hide", !kinds.has(ix.get(g.dataset.id).kind)));
+    $$(".gedge", svg).forEach(l => { const e = E[+l.dataset.i]; l.classList.toggle("hide", !kinds.has(e.s.kind) || !kinds.has(e.t.kind) || (!e.direct && !inferred)); });
+  };
+  $$("[data-kind],[data-inferred]", host).forEach(c => c.onchange = applyFilter);
+  const finder = $(".graph-filter input.in", host);
+  finder.addEventListener("change", () => { const q = finder.value.trim(); const m = N.find(n => n.label === q) || N.find(n => n.label.includes(q)); if (m) focus(m.id); });
   $$(".gnode", svg).forEach(g => { g.addEventListener("click", () => select(g.dataset.id)); g.addEventListener("keydown", e => { if (e.key === "Enter") select(g.dataset.id); }); });
   svg.addEventListener("dblclick", () => { $$(".dim", svg).forEach(x => x.classList.remove("dim")); $$(".sel", svg).forEach(x => x.classList.remove("sel")); });
-  return {select};
+  return {select, focus, highlight};
 }
 
 /** Panel content for a selected graph node — every relation states its evidence type. */
@@ -272,7 +300,7 @@ function nodePanel(n, rel) {
   else if (n.kind === "message") { head = `<h3>رسالة <span class="mono">${esc(n.label)}</span></h3><dl class="kv"><dt>الحكم</dt><dd>${pill(n.verdict)}</dd><dt>درجة الخطر</dt><dd class="num">${pct(n.score)}</dd></dl>`; actions = `<a class="btn" href="${link("messages", n.label)}">فتح التحقيق</a>`; }
   else if (n.kind === "indicator") { head = `<h3>${tchip(n.type)}</h3><div class="ltr" style="margin:6px 0">${esc(n.label)}</div><dl class="kv">${n.messages != null ? `<dt>رسائل</dt><dd class="num">${n.messages}</dd>` : ""}<dt>دوره</dt><dd>${n.bridge ? '<span class="pill warn">نقطة ربط وحيدة</span> لولاه لانقسمت الحملة' : "مورد يتحكم به المهاجم"}</dd></dl>`; actions = `<a class="btn" href="${link("intel", "", {type: n.type, value: n.label})}">ملف المؤشر</a>`; }
   else { head = `<h3>جهة منتحلة: ${esc(n.label)}</h3><p class="note">ذِكر اسم جهة في الرسالة دليل انتحال، لا يربط الحملات ببعضها.</p>`; actions = `<a class="btn" href="${link("intel", "", {tab: "entities"})}">الكيانات</a>`; }
-  return `${head}<div class="toolbar" style="margin:6px 0 10px">${actions}</div><div class="note">العلاقات (${rel.length})</div><ul class="edge-list">${rows || '<li class="mute">لا علاقات</li>'}</ul>`;
+  return `${head}<div class="toolbar" style="margin:6px 0 10px">${actions}</div>${n.kind === "message" || n.kind === "indicator" ? '<div data-enrich><div class="loading" style="padding:10px">جارٍ تحميل الدليل</div></div>' : ""}<div class="note">العلاقات (${rel.length})</div><ul class="edge-list">${rows || '<li class="mute">لا علاقات</li>'}</ul>`;
 }
 
 /* ---------------- message highlighting ---------------- */
@@ -290,4 +318,4 @@ function highlight(text, evidence, indicators) {
   return out;
 }
 
-window.RASD = {$, $$, esc, fmt, pct, day, dt, bytes, T, varName, pill, tchip, srcChip, icon, api, qs, setKey, AuthError, parseHash, go, link, bindRows, drawer, closeDrawer, dailyBars, donut, hbars, evidenceGraph, nodePanel, highlight, STATIC};
+window.RASD = {tipFor, $, $$, esc, fmt, pct, day, dt, bytes, T, varName, pill, tchip, srcChip, icon, api, qs, setKey, AuthError, parseHash, go, link, bindRows, drawer, closeDrawer, dailyBars, donut, hbars, evidenceGraph, nodePanel, highlight, STATIC};

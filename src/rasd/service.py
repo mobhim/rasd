@@ -25,6 +25,31 @@ class Rasd:
         """Stateless analysis — nothing is stored."""
         return self.analyzer.analyze(msg).to_dict()
 
+    def analyze_traced(self, msg: Message) -> tuple[dict, dict]:
+        from .analysis.trace import trace
+        a = self.analyzer.analyze(msg)
+        return a.to_dict(), trace(msg.text, a)
+
+    def correlate(self, tenant: str, analysis: dict) -> dict:
+        """Which stored messages and campaigns share an actor-controlled resource
+        with this (un-stored) message? Same evidence standard as the graph:
+        only linkable body indicators count; suppressed ones are reported, not used."""
+        g = self.graph(tenant)
+        out = []
+        for i in analysis["indicators"]:
+            if i["role"] != "body":
+                continue
+            ids = self.store.by_indicator(tenant, i["type"], i["value"])
+            camps = sorted({g.msg_campaign[m] for m in ids if m in g.msg_campaign})
+            out.append({"key": i["key"], "type": i["type"], "value": i["value"], "linkable": i["linkable"],
+                        "seen_in_messages": len(ids), "message_ids": ids[:10], "campaign_ids": camps,
+                        "suppressed_reason": g.suppressed.get(i["key"])})
+        usable = [c for c in out if c["linkable"] and not c["suppressed_reason"]]
+        return {"indicators": out,
+                "would_join_campaigns": sorted({c for x in usable for c in x["campaign_ids"]}),
+                "shares_resources_with_messages": sorted({m for x in usable for m in x["message_ids"]})[:20],
+                "standard": "only actor-controlled resources (linkable, not suppressed) can link; text similarity never does"}
+
     def ingest(self, tenant: str, msg: Message) -> dict:
         a = self.analyzer.analyze(msg)
         text, redactions = redact(msg.text, a.indicators)

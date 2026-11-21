@@ -16,7 +16,21 @@ from fastapi.testclient import TestClient
 
 from .api.app import DASHBOARD, create_app
 from .eval.generator import generate
+from . import __version__
 from .service import Rasd
+
+ENGINE_PACKAGES = ("lang", "indicators", "analysis", "xai")
+ENGINE_MODULES = ("__init__.py", "models.py", "text.py", "privacy.py")
+
+
+def engine_sources() -> dict[str, str]:
+    """The pure-stdlib part of RASD (no API, storage or graph) — exactly the files the server runs."""
+    pkg = Path(__file__).resolve().parent
+    files = {f"rasd/{m}": (pkg / m).read_text(encoding="utf8") for m in ENGINE_MODULES}
+    for sub in ENGINE_PACKAGES:
+        for f in sorted((pkg / sub).glob("*.py")):
+            files[f"rasd/{sub}/{f.name}"] = f.read_text(encoding="utf8")
+    return files
 
 TABLES = ("messages", "indicators", "investigations", "operations", "audit")
 
@@ -34,7 +48,7 @@ def export(out: str, seed: int = 7, n_campaigns: int = 20, n_singletons: int = 3
     data = root / "snapshot"
     if data.exists():
         shutil.rmtree(data)
-    for sub in ("campaigns", "graph", "links", "messages", "indicators", "db"):
+    for sub in ("campaigns", "graph", "links", "messages", "indicators", "db", "demo", "engine"):
         (data / sub).mkdir(parents=True, exist_ok=True)
     c = TestClient(create_app(Rasd(), {"snapshot": "demo"}))
     h = {"X-API-Key": "snapshot"}
@@ -100,17 +114,25 @@ def export(out: str, seed: int = 7, n_campaigns: int = 20, n_singletons: int = 3
             if off >= page["total"]:
                 break
         put(f"db/{t}.json", {"columns": page["columns"], "rows": rows})
+    samples = get("/v1/demo/samples")
+    put("demo/samples.json", samples)
+    for s in samples["samples"]:
+        r = c.post("/v1/analyze", headers=h, json={"text": s["text"], "sender": s["sender"]})
+        r.raise_for_status()
+        put(f"demo/{s['id']}.json", r.json())
+    put("engine/bundle.json", {"version": __version__, "files": engine_sources(),
+                               "note": "unmodified RASD engine source, executed in the browser by Pyodide"})
     health = get("/v1/system/health")
     put("system-health.json", health)
     put("meta.json", {"generated_at": health["measured_at"], "seed": seed, "messages": len(msgs),
                       "source": "synthetic test bench (rasd.eval.generator) analysed by the real RASD engine and API"})
     # dashboard files, re-pointed at the snapshot
-    for f in ("app.css", "core.js", "views.js", "static.js"):
+    for f in ("app.css", "core.js", "views.js", "static.js", "engine.js", "demo.js"):
         shutil.copy(DASHBOARD / f, root / f)
     html = (DASHBOARD / "index.html").read_text(encoding="utf8")
     html = html.replace('href="static/app.css"', 'href="app.css"').replace(
         '<script src="static/core.js"></script>',
-        '<script>window.RASD_STATIC_BASE="snapshot/";</script><script src="static.js"></script><script src="core.js"></script>'
-    ).replace('<script src="static/views.js"></script>', '<script src="views.js"></script>')
+        '<script>window.RASD_STATIC_BASE="snapshot/";</script><script src="engine.js"></script><script src="static.js"></script><script src="core.js"></script>'
+    ).replace('<script src="static/demo.js"></script>', '<script src="demo.js"></script>').replace('<script src="static/views.js"></script>', '<script src="views.js"></script>')
     (root / "index.html").write_text(html, encoding="utf8")
     return n
