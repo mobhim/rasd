@@ -1,3 +1,5 @@
+<div dir="rtl">
+
 # رصد RASD — Arabic Threat Intelligence
 
 منظومة لاكتشاف **حملات** الهندسة الاجتماعية والاحتيال باللغة العربية (فصحى ولهجات): تستخرج المؤشرات الرقمية من الرسائل، وتربطها في رسم أدلة، وتشرح سبب كل حكم وكل ربط. ليست مصنِّف رسائل.
@@ -6,16 +8,20 @@
 
 ## التشغيل
 
+<div dir="ltr">
+
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[api,eval,dev]"
 
-pytest                                   # 29 اختبارًا
+pytest                                   # 29 tests
 rasd analyze "عزيزي العميل تم إيقاف بطاقتك حدث بياناتك https://alrajhi-update.example/login" --sender 0500012345
-rasd seed --db rasd.db                   # بيانات اصطناعية للعرض (نطاقات ‎.example/.test‎ فقط)
-RASD_DB=rasd.db RASD_API_KEYS=my-key:default rasd serve   # اللوحة على http://127.0.0.1:8000 ، توثيق الـAPI على /docs
-rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # يعيد إنتاج docs/eval/results_seed7.json
+rasd seed --db rasd.db                   # synthetic demo data (.example/.test domains only)
+RASD_DB=rasd.db RASD_API_KEYS=my-key:default rasd serve   # dashboard: http://127.0.0.1:8000  API docs: /docs
+rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # reproduces docs/eval/results_seed7.json
 ```
+
+</div>
 
 البيانات الحقيقية لا تُوزَّع مع المستودع (GPL‑3.0 وتحوي بيانات شخصية)؛ نزّلها إلى `data/external/Arabic_Spam.csv` من `github.com/KhalidAlsantali/Arabic-SMS-Spam-Data`.
 
@@ -68,3 +74,5 @@ rasd eval --seed 7 --external data/external/Arabic_Spam.csv   # يعيد إنت�
 ## التوثيق
 
 `docs/01-research-gap.md` البحث والفجوة · `02-problem-statement.md` المشكلة والمقاييس · `03-architecture.md` المعمارية · `04-evaluation.md` التقييم · `05-security-privacy.md` الأمن والخصوصية · `06-business-model.md` النموذج التجاري · `research/raw_research_notes.md` المصادر كاملة.
+
+</div>
